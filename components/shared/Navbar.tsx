@@ -45,7 +45,7 @@ export default function Navbar() {
                   Login
                 </Link>
                 <Link
-                  href="auth/register"
+                  href="/auth/register"
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                 >
                   Sign Up
@@ -104,10 +104,10 @@ export default function Navbar() {
                   <Link href="/register?role=guide" className="text-gray-700 hover:text-blue-600">
                     Become a Guide
                   </Link>
-                  <Link href="auth/login" className="text-gray-700 hover:text-blue-600">
+                  <Link href="/auth/login" className="text-gray-700 hover:text-blue-600">
                     Login
                   </Link>
-                  <Link href="auth/register" className="text-blue-600 font-semibold">
+                  <Link href="/auth/register" className="text-blue-600 font-semibold">
                     Sign Up
                   </Link>
                 </>
