@@ -1,51 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { format, formatDistance } from 'date-fns';
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: string | Date): string {
-  return format(new Date(date), 'MMM dd, yyyy');
-}
-
-export function formatDateTime(date: string | Date): string {
-  return format(new Date(date), 'MMM dd, yyyy HH:mm');
-}
-
-export function formatRelativeTime(date: string | Date): string {
-  return formatDistance(new Date(date), new Date(), { addSuffix: true });
-}
-
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number, currency = 'USD') {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency,
   }).format(amount);
 }
-
-export function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
-}
-
-export function getErrorMessage(error: any): string {
-  if (error.response?.data?.message) {
-    return error.response.data.message;
-  }
-  if (error.message) {
-    return error.message;
-  }
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
   return 'An unexpected error occurred';
 }
+// utils.ts
+export function formatDate(date: string | Date) {
+  const d = new Date(date);
+  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+

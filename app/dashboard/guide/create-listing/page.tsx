@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client';
 
 import { useState } from 'react';
@@ -8,6 +9,7 @@ import toast from 'react-hot-toast';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card, { CardBody, CardHeader } from '@/components/ui/Card';
+import ImageUpload from '@/components/ui/ImageUploads';
 import { getErrorMessage } from '@/lib/utils';
 
 export default function CreateListingPage() {
@@ -23,30 +25,25 @@ export default function CreateListingPage() {
     maxGroupSize: '',
     category: '',
     city: '',
-    images: [''],
+    images: [] as string[],
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (index: number, value: string) => {
-    const newImages = [...formData.images];
-    newImages[index] = value;
-    setFormData({ ...formData, images: newImages });
-  };
-
-  const addImageField = () => {
-    setFormData({ ...formData, images: [...formData.images, ''] });
-  };
-
-  const removeImageField = (index: number) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
-    setFormData({ ...formData, images: newImages });
+  const handleImagesUpload = (urls: string[]) => {
+    setFormData({ ...formData, images: urls });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.images.length === 0) {
+      toast.error('Please upload at least one image');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -55,7 +52,6 @@ export default function CreateListingPage() {
         tourFee: parseFloat(formData.tourFee),
         duration: parseInt(formData.duration),
         maxGroupSize: parseInt(formData.maxGroupSize),
-        images: formData.images.filter((img) => img.trim() !== ''),
       };
 
       await api.post('/listings', submitData);
@@ -213,45 +209,12 @@ export default function CreateListingPage() {
 
               {/* Images */}
               <div>
-                <h2 className="text-xl font-bold mb-4">Images</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  Add image URLs (use services like Unsplash, Imgur, or your own hosting)
-                </p>
-                
-                <div className="space-y-3">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        label={index === 0 ? 'Image URL' : ''}
-                        value={image}
-                        onChange={(e) => handleImageChange(index, e.target.value)}
-                        placeholder="https://images.unsplash.com/photo-..."
-                        required={index === 0}
-                      />
-                      {index > 0 && (
-                        <Button
-                          type="button"
-                          variant="danger"
-                          size="sm"
-                          onClick={() => removeImageField(index)}
-                          className="mt-6"
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addImageField}
-                  className="mt-3"
-                >
-                  + Add Another Image
-                </Button>
+                <h2 className="text-xl font-bold mb-4">Tour Images</h2>
+                <ImageUpload
+                  onUploadComplete={handleImagesUpload}
+                  maxImages={5}
+                  existingImages={formData.images}
+                />
               </div>
 
               {/* Submit */}

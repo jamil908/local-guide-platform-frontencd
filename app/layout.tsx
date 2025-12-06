@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import Navbar from '@/components/shared/Navbar';
+import Footer from '@/components/shared/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,7 +27,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="grow">{children}</main>
-            {/* <Footer /> */}
+            <Footer />
           </div>
           <Toaster
             position="top-right"
