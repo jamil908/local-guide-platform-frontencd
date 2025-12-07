@@ -1,18 +1,66 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import api from '@/lib/api';
+// Assuming '@/lib/api', '@/contexts/AuthContext', and '@/types' are correctly defined
+import api from '@/lib/api'; 
 import { useAuth } from '@/contexts/AuthContext';
 import { Booking, Listing } from '@/types';
+// Assuming '@/lib/utils' is correctly defined
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { FiPlus, FiCalendar, FiDollarSign, FiUsers, FiStar, FiEdit, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+// Assuming '@/components/ui/Button', '@/components/ui/Card', and '@/components/shared/Loading' are correctly defined
 import Button from '@/components/ui/Button';
-import Card, { CardBody, CardHeader } from '@/components/ui/Card';
+import Card, { CardBody } from '@/components/ui/Card'; 
 import Loading from '@/components/shared/Loading';
 import toast from 'react-hot-toast';
+
+// --- CUSTOM COMPONENTS FOR DARK THEME (Adopted from the previous response) ---
+
+// Custom Button for Amber Theme
+const AmberButton = ({ children, onClick, className, size, type, variant, ...props }: any) => {
+    const baseStyle = "font-bold transition duration-200 ease-in-out rounded-full flex items-center justify-center";
+    const sizeStyle = size === 'lg' ? 'px-8 py-3 text-lg' : size === 'sm' ? 'px-4 py-1.5 text-sm' : 'px-6 py-2 text-base';
+    
+    let colorStyle = "";
+    if (variant === 'outline') {
+      colorStyle = "border-2 border-amber-600 text-amber-400 hover:bg-amber-600/10";
+    } else if (variant === 'danger') {
+      colorStyle = "bg-red-700 text-white hover:bg-red-600 focus:ring-red-500/50";
+    } else if (variant === 'success') {
+      colorStyle = "bg-green-700 text-white hover:bg-green-600 focus:ring-green-500/50";
+    } else {
+      colorStyle = "bg-amber-500 text-gray-900 hover:bg-amber-400 focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50";
+    }
+  
+    return (
+      <button
+        onClick={onClick}
+        type={type}
+        className={`${baseStyle} ${sizeStyle} ${colorStyle} ${className}`}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+};
+
+// Custom Card for Dark Theme (assuming Card component can take tailwind classes)
+const DarkCard = ({ children, className, hover, ...props }: any) => {
+    const baseStyle = "bg-gray-800 rounded-xl shadow-lg border border-gray-700";
+    const hoverStyle = hover ? "hover:shadow-amber-500/30 transition-all duration-300 hover:border-amber-500" : "";
+    
+    return (
+        <div className={`${baseStyle} ${hoverStyle} ${className}`} {...props}>
+            {children}
+        </div>
+    );
+}
+
+// -----------------------------------------------------------------------------
 
 export default function GuideDashboard() {
   const { user, isAuthenticated } = useAuth();
@@ -23,19 +71,27 @@ export default function GuideDashboard() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'listings'>('bookings');
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-    if (user?.role !== 'GUIDE') {
-      router.push('/');
-      return;
-    }
-    fetchData();
-  }, [isAuthenticated, user]);
+  // Check authentication status
+  if (!isAuthenticated) {
+    router.push('/login');
+    return;
+  }
 
+  // Check user role (using optional chaining for safety)
+  if (user?.role && user.role !== 'GUIDE') {
+    router.push('/');
+    return;
+  }
+
+  // Fetch data only if authenticated and the role is confirmed or null (waiting for confirmation)
+  if (isAuthenticated && user?.role === 'GUIDE') {
+    fetchData();
+  }
+  
+}, [isAuthenticated, user?.role, router]); // <- FIX: use primitive value (user?.role)
   const fetchData = async () => {
     try {
+      setLoading(true);
       const [bookingsRes, listingsRes] = await Promise.all([
         api.get('/bookings/my-bookings'),
         api.get('/listings/my/listings'),
@@ -75,86 +131,92 @@ export default function GuideDashboard() {
   const upcomingBookings = bookings.filter(
     (b) => b.status === 'CONFIRMED' && new Date(b.bookingDate) >= new Date()
   );
+  // Calculate total earnings from completed bookings
   const totalEarnings = bookings
     .filter((b) => b.status === 'COMPLETED')
     .reduce((sum, b) => sum + b.totalAmount, 0);
 
-  if (loading) return <Loading />;
+  if (loading) return <Loading color="text-amber-500" className="bg-gray-900 min-h-screen" />;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-900 text-gray-100 py-12">
       <div className="container-custom">
+        
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-10 border-b border-gray-700 pb-6">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Guide Dashboard</h1>
-            <p className="text-gray-600">Manage your tours and bookings</p>
+            <h1 className="text-4xl font-extrabold text-amber-400 mb-2">Guide Dashboard</h1>
+            <p className="text-gray-400">Manage your tours and bookings</p>
           </div>
           <Link href="/dashboard/guide/create-listing">
-            <Button size="lg">
+            <AmberButton size="lg">
               <FiPlus className="mr-2" />
               Create New Tour
-            </Button>
+            </AmberButton>
           </Link>
         </div>
-
+        
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <Card>
+        <div className="grid md:grid-cols-4 gap-6 mb-12">
+          {/* Pending Requests */}
+          <DarkCard>
             <CardBody className="text-center">
-              <div className="text-3xl font-bold text-yellow-600 mb-2">
+              <div className="text-4xl font-bold text-amber-500 mb-2">
                 {pendingBookings.length}
               </div>
-              <div className="text-gray-600">Pending Requests</div>
+              <div className="text-gray-400">Pending Requests</div>
             </CardBody>
-          </Card>
+          </DarkCard>
 
-          <Card>
+          {/* Upcoming Tours */}
+          <DarkCard>
             <CardBody className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
+              <div className="text-4xl font-bold text-sky-400 mb-2">
                 {upcomingBookings.length}
               </div>
-              <div className="text-gray-600">Upcoming Tours</div>
+              <div className="text-gray-400">Upcoming Tours</div>
             </CardBody>
-          </Card>
+          </DarkCard>
 
-          <Card>
+          {/* Total Earnings */}
+          <DarkCard>
             <CardBody className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">
+              <div className="text-4xl font-bold text-green-500 mb-2">
                 {formatCurrency(totalEarnings)}
               </div>
-              <div className="text-gray-600">Total Earnings</div>
+              <div className="text-gray-400">Total Earnings</div>
             </CardBody>
-          </Card>
+          </DarkCard>
 
-          <Card>
+          {/* Active Listings */}
+          <DarkCard>
             <CardBody className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">
+              <div className="text-4xl font-bold text-purple-400 mb-2">
                 {listings.length}
               </div>
-              <div className="text-gray-600">Active Listings</div>
+              <div className="text-gray-400">Active Listings</div>
             </CardBody>
-          </Card>
+          </DarkCard>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-8 border-b border-gray-700">
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`px-6 py-3 rounded-lg font-semibold transition ${
+            className={`px-6 py-3 font-semibold transition border-b-2 ${
               activeTab === 'bookings'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
+                ? 'border-amber-500 text-amber-400'
+                : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
             Bookings ({bookings.length})
           </button>
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-6 py-3 rounded-lg font-semibold transition ${
+            className={`px-6 py-3 font-semibold transition border-b-2 ${
               activeTab === 'listings'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
+                ? 'border-amber-500 text-amber-400'
+                : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
             My Tours ({listings.length})
@@ -163,70 +225,71 @@ export default function GuideDashboard() {
 
         {/* Content */}
         {activeTab === 'bookings' ? (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Pending Requests */}
             {pendingBookings.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold mb-4 text-yellow-600">
-                  Pending Requests ({pendingBookings.length})
+                <h2 className="text-2xl font-bold mb-4 text-amber-500">
+                  ⚠️ Pending Requests ({pendingBookings.length})
                 </h2>
                 <div className="space-y-4">
                   {pendingBookings.map((booking) => (
-                    <Card key={booking.id}>
+                    <DarkCard key={booking.id}>
                       <CardBody>
                         <div className="flex flex-col md:flex-row gap-6">
                           <img
-                            src={booking.listing?.images[0] || '/placeholder.jpg'}
+                            src={booking.listing?.images[0] || 'https://via.placeholder.com/400x300?text=Tour+Image'}
                             alt={booking.listing?.title}
-                            className="w-full md:w-48 h-32 object-cover rounded-lg"
+                            className="w-full md:w-48 h-32 object-cover rounded-lg border border-gray-700"
                           />
                           
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-4">
                               <div>
-                                <h3 className="text-xl font-bold">{booking.listing?.title}</h3>
-                                <p className="text-gray-600 mt-1">
-                                  Requested by: {booking.tourist?.name}
+                                <h3 className="text-xl font-bold text-white">{booking.listing?.title}</h3>
+                                <p className="text-gray-400 mt-1">
+                                  Requested by: <span className="text-amber-400">{booking.tourist?.name}</span>
                                 </p>
                               </div>
                               <div className="text-right">
-                                <div className="text-xl font-bold text-blue-600">
+                                <div className="text-2xl font-bold text-green-500">
                                   {formatCurrency(booking.totalAmount)}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {booking.numberOfPeople} people
+                                  <FiUsers className="inline-block mr-1" />{booking.numberOfPeople} people
                                 </div>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-4 mb-4 text-gray-600">
+                            <div className="flex items-center gap-4 mb-4 text-gray-400">
                               <div className="flex items-center gap-2">
-                                <FiCalendar />
-                                <span>{formatDate(booking.bookingDate)}</span>
+                                <FiCalendar className="text-amber-500" />
+                                <span className="font-medium">{formatDate(booking.bookingDate)}</span>
                               </div>
                             </div>
 
-                            <div className="flex gap-3">
-                              <Button
+                            <div className="flex gap-3 pt-2 border-t border-gray-700">
+                              <AmberButton
                                 size="sm"
+                                variant="success"
                                 onClick={() => handleBookingAction(booking.id, 'CONFIRMED')}
                               >
                                 <FiCheck className="mr-2" />
                                 Accept
-                              </Button>
-                              <Button
+                              </AmberButton>
+                              <AmberButton
                                 size="sm"
                                 variant="danger"
                                 onClick={() => handleBookingAction(booking.id, 'CANCELLED')}
                               >
                                 <FiX className="mr-2" />
                                 Decline
-                              </Button>
+                              </AmberButton>
                             </div>
                           </div>
                         </div>
                       </CardBody>
-                    </Card>
+                    </DarkCard>
                   ))}
                 </div>
               </div>
@@ -234,32 +297,32 @@ export default function GuideDashboard() {
 
             {/* All Bookings */}
             <div>
-              <h2 className="text-2xl font-bold mb-4">All Bookings</h2>
+              <h2 className="text-2xl font-bold mb-4 text-white">All Bookings</h2>
               {bookings.length === 0 ? (
-                <Card>
+                <DarkCard>
                   <CardBody className="text-center py-12">
-                    <div className="text-6xl mb-4">📅</div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No bookings yet</h3>
-                    <p className="text-gray-600">
+                    <div className="text-6xl mb-4 text-amber-500">📅</div>
+                    <h3 className="text-xl font-bold text-white mb-2">No bookings yet</h3>
+                    <p className="text-gray-400">
                       Your bookings will appear here once tourists start booking your tours.
                     </p>
                   </CardBody>
-                </Card>
+                </DarkCard>
               ) : (
                 <div className="space-y-4">
                   {bookings.map((booking) => (
-                    <Card key={booking.id} hover>
+                    <DarkCard key={booking.id} hover>
                       <CardBody>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <img
-                              src={booking.tourist?.profilePic || '/avatar.png'}
+                              src={booking.tourist?.profilePic || `https://ui-avatars.com/api/?name=${booking.tourist?.name || 'User'}&background=d97706&color=fff`}
                               alt={booking.tourist?.name}
-                              className="w-12 h-12 rounded-full"
+                              className="w-12 h-12 rounded-full border-2 border-amber-500/50"
                             />
                             <div>
-                              <h3 className="font-bold">{booking.listing?.title}</h3>
-                              <p className="text-sm text-gray-600">
+                              <h3 className="font-bold text-white">{booking.listing?.title}</h3>
+                              <p className="text-sm text-gray-400">
                                 {booking.tourist?.name} • {formatDate(booking.bookingDate)}
                               </p>
                             </div>
@@ -267,16 +330,16 @@ export default function GuideDashboard() {
                           
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <div className="font-bold">{formatCurrency(booking.totalAmount)}</div>
+                              <div className="font-bold text-green-500">{formatCurrency(booking.totalAmount)}</div>
                               <span
-                                className={`text-xs px-2 py-1 rounded-full ${
+                                className={`text-xs px-2 py-1 rounded-full font-medium ${
                                   booking.status === 'CONFIRMED'
-                                    ? 'bg-green-100 text-green-800'
+                                    ? 'bg-green-800/50 text-green-400'
                                     : booking.status === 'PENDING'
-                                    ? 'bg-yellow-100 text-yellow-800'
+                                    ? 'bg-amber-800/50 text-amber-400'
                                     : booking.status === 'COMPLETED'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : 'bg-red-100 text-red-800'
+                                    ? 'bg-sky-800/50 text-sky-400'
+                                    : 'bg-red-800/50 text-red-400'
                                 }`}
                               >
                                 {booking.status}
@@ -285,7 +348,7 @@ export default function GuideDashboard() {
                           </div>
                         </div>
                       </CardBody>
-                    </Card>
+                    </DarkCard>
                   ))}
                 </div>
               )}
@@ -295,73 +358,73 @@ export default function GuideDashboard() {
           /* Listings Tab */
           <div className="space-y-6">
             {listings.length === 0 ? (
-              <Card>
+              <DarkCard>
                 <CardBody className="text-center py-12">
-                  <div className="text-6xl mb-4">🎒</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <div className="text-6xl mb-4 text-amber-500">🎒</div>
+                  <h3 className="text-xl font-bold text-white mb-2">
                     No tours yet
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-400 mb-6">
                     Create your first tour and start connecting with travelers!
                   </p>
                   <Link href="/dashboard/guide/create-listing">
-                    <Button>
+                    <AmberButton>
                       <FiPlus className="mr-2" />
                       Create Your First Tour
-                    </Button>
+                    </AmberButton>
                   </Link>
                 </CardBody>
-              </Card>
+              </DarkCard>
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
                 {listings.map((listing) => (
-                  <Card key={listing.id} hover>
+                  <DarkCard key={listing.id} hover>
                     <img
-                      src={listing.images[0] || '/placeholder.jpg'}
+                      src={listing.images[0] || 'https://via.placeholder.com/400x300?text=Tour+Image'}
                       alt={listing.title}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-48 object-cover rounded-t-xl"
                     />
                     <CardBody>
-                      <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      <h3 className="text-xl font-bold mb-2 text-white">{listing.title}</h3>
+                      <p className="text-gray-400 text-sm mb-4 line-clamp-2">
                         {listing.description}
                       </p>
 
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center justify-between mb-4 border-b border-gray-700 pb-4">
+                        <div className="flex items-center gap-4 text-sm text-gray-400">
                           <div className="flex items-center gap-1">
-                            <FiStar className="text-yellow-500" />
-                            <span>{listing.averageRating?.toFixed(1) || 'New'}</span>
+                            <FiStar className="text-amber-500" />
+                            <span className='text-white font-medium'>{listing.averageRating?.toFixed(1) || 'New'}</span>
                           </div>
                           <span>{listing.reviewCount || 0} reviews</span>
                         </div>
-                        <div className="text-xl font-bold text-blue-600">
+                        <div className="text-2xl font-bold text-green-500">
                           {formatCurrency(listing.tourFee)}
                         </div>
                       </div>
 
                       <div className="flex gap-2">
                         <Link href={`/tours/${listing.id}`} className="flex-1">
-                          <Button variant="outline" size="sm" className="w-full">
+                          <AmberButton variant="outline" size="sm" className="w-full">
                             View
-                          </Button>
+                          </AmberButton>
                         </Link>
                         <Link href={`/dashboard/guide/edit/${listing.id}`} className="flex-1">
-                          <Button size="sm" className="w-full">
+                          <AmberButton size="sm" className="w-full">
                             <FiEdit className="mr-2" />
                             Edit
-                          </Button>
+                          </AmberButton>
                         </Link>
-                        <Button
+                        <AmberButton
                           size="sm"
                           variant="danger"
                           onClick={() => handleDeleteListing(listing.id)}
                         >
                           <FiTrash2 />
-                        </Button>
+                        </AmberButton>
                       </div>
                     </CardBody>
-                  </Card>
+                  </DarkCard>
                 ))}
               </div>
             )}

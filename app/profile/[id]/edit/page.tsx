@@ -6,12 +6,90 @@ import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Card, { CardBody, CardHeader } from '@/components/ui/Card';
-import SingleImageUpload from '@/components/ui/SingleImageUpload';
-import Loading from '@/components/shared/Loading';
 import { getErrorMessage } from '@/lib/utils';
+import { FiSave, FiX, FiPlus } from 'react-icons/fi';
+// NOTE: Assuming original SingleImageUpload is available and adaptable.
+import SingleImageUpload from '@/components/ui/SingleImageUpload';
+// NOTE: Custom components are defined below for dark theme consistency.
+
+// --- CUSTOM COMPONENTS FOR DARK THEME (Used for consistency) ---
+
+const DarkLoading = ({ color = 'text-amber-500', className = 'min-h-screen bg-gray-900', ...props }: any) => (
+    <div className={`flex items-center justify-center ${className}`} {...props}>
+        <div className={`animate-spin rounded-full h-12 w-12 border-4 border-t-4 border-t-current ${color}`}></div>
+    </div>
+);
+
+const AmberButton = ({ children, onClick, className, size, type = "button", variant, isLoading, ...props }: any) => {
+    const baseStyle = "font-bold transition duration-200 ease-in-out rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed";
+    const sizeStyle = size === 'sm' ? 'px-4 py-1.5 text-sm' : 'px-6 py-2 text-base';
+    
+    let colorStyle = "";
+    if (variant === 'secondary') {
+        colorStyle = "bg-gray-700 text-gray-300 hover:bg-gray-600 focus:ring-gray-500/50";
+    } else if (variant === 'outline') {
+        colorStyle = "border-2 border-amber-600 text-amber-400 hover:bg-amber-600/10";
+    } else {
+        colorStyle = "bg-amber-500 text-gray-900 hover:bg-amber-400 focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50";
+    }
+  
+    return (
+      <button
+        onClick={onClick}
+        type={type}
+        disabled={isLoading}
+        className={`${baseStyle} ${sizeStyle} ${colorStyle} ${className}`}
+        {...props}
+      >
+        {isLoading ? (
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-2 border-t-white"></div>
+        ) : (
+          children
+        )}
+      </button>
+    );
+};
+
+const DarkInput = ({ label, name, type = 'text', value, onChange, placeholder, required, onKeyPress, ...props }: any) => (
+    <div>
+        {label && (
+            <label htmlFor={name} className="block text-sm font-medium text-gray-300 mb-1">
+                {label} {required && <span className='text-red-500'>*</span>}
+            </label>
+        )}
+        <input
+            id={name}
+            name={name}
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            required={required}
+            onKeyPress={onKeyPress}
+            className="w-full px-4 py-2.5 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 transition duration-150"
+            {...props}
+        />
+    </div>
+);
+
+const DarkCard = ({ children, className, ...props }: any) => (
+    <div className={`bg-gray-800 rounded-xl shadow-2xl border border-gray-700 ${className}`} {...props}>
+        {children}
+    </div>
+);
+
+const DarkCardHeader = ({ children, className }: any) => (
+    <div className={`p-6 border-b border-gray-700 ${className}`}>
+        {children}
+    </div>
+);
+
+const DarkCardBody = ({ children, className }: any) => (
+    <div className={`p-6 ${className}`}>
+        {children}
+    </div>
+);
+// -----------------------------------------------------------------------------
 
 export default function ProfileEditPage() {
   const params = useParams();
@@ -31,18 +109,23 @@ export default function ProfileEditPage() {
   const [languageInput, setLanguageInput] = useState('');
   const [expertiseInput, setExpertiseInput] = useState('');
 
-  useEffect(() => {
-    if (currentUser?.id !== params.id) {
+  const profileId = Array.isArray(params.id) ? params.id[0] : params.id;
+// ProfileEditPage.tsx (FIXED useEffect)
+useEffect(() => {
+    // Only proceed if profileId is defined (to handle initial render)
+    if (!profileId) return; 
+
+    if (currentUser?.id !== profileId) {
       toast.error('Unauthorized');
       router.push('/');
       return;
     }
     fetchProfile();
-  }, [params.id, currentUser]);
-
+}, [profileId, currentUser?.id, router]); // <-- FIX: Use primitives and the router object
   const fetchProfile = async () => {
+    if (!profileId) return;
     try {
-      const response = await api.get(`/users/${params.id}`);
+      const response = await api.get(`/users/${profileId}`);
       const profile = response.data.data;
       
       setFormData({
@@ -118,16 +201,17 @@ export default function ProfileEditPage() {
 
       if (currentUser?.role === 'GUIDE') {
         updateData.expertise = formData.expertise;
-        updateData.dailyRate = formData.dailyRate ? parseFloat(formData.dailyRate) : null;
+        // Use unary plus operator or parseFloat to ensure dailyRate is a number or null
+        updateData.dailyRate = formData.dailyRate ? +formData.dailyRate : null;
       }
 
       if (currentUser?.role === 'TOURIST') {
         updateData.travelPreferences = formData.travelPreferences;
       }
 
-      await api.patch(`/users/${params.id}`, updateData);
-      toast.success('Profile updated successfully!');
-      router.push(`/profile/${params.id}`);
+      await api.patch(`/users/${profileId}`, updateData);
+      toast.success('Profile updated successfully! ✨');
+      router.push(`/profile/${profileId}`);
     } catch (error: any) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -135,142 +219,151 @@ export default function ProfileEditPage() {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) return <DarkLoading />;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-900 py-12">
       <div className="max-w-3xl mx-auto px-4">
-        <Card>
-          <CardHeader>
-            <h1 className="text-3xl font-bold">Edit Profile</h1>
-            <p className="text-gray-600 mt-2">
-              Update your profile information
+        <DarkCard>
+          <DarkCardHeader>
+            <h1 className="text-3xl font-extrabold text-amber-400">Edit Profile 📝</h1>
+            <p className="text-gray-400 mt-2">
+              Update your personal details to keep your profile current.
             </p>
-          </CardHeader>
+          </DarkCardHeader>
 
-          <CardBody>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <DarkCardBody>
+            <form onSubmit={handleSubmit} className="space-y-8">
               {/* Profile Picture */}
-              <SingleImageUpload
+              <SingleImageUpload 
                 onUploadComplete={handleProfilePicUpload}
                 existingImage={formData.profilePic}
                 label="Profile Picture"
+                // Custom dark theme styles for the upload component
+                // className="border-gray-700 bg-gray-900 p-4 rounded-lg" 
               />
-
-              {/* Basic Info */}
-              <div>
-                <h2 className="text-xl font-bold mb-4">Basic Information</h2>
-                
-                <div className="space-y-4">
-                  <Input
-                    label="Full Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Bio
-                    </label>
-                    <textarea
-                      name="bio"
-                      value={formData.bio}
+              
+              <div className='space-y-6'>
+                {/* Basic Info */}
+                <div>
+                  <h2 className="text-xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Basic Information</h2>
+                  
+                  <div className="space-y-4">
+                    <DarkInput
+                      label="Full Name"
+                      name="name"
+                      value={formData.name}
                       onChange={handleChange}
-                      rows={4}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Tell us about yourself..."
+                      required
                     />
+
+                    <div>
+                      <label htmlFor="bio" className="block text-sm font-medium text-gray-300 mb-1">
+                        Bio
+                      </label>
+                      <textarea
+                        id="bio"
+                        name="bio"
+                        value={formData.bio}
+                        onChange={handleChange}
+                        rows={4}
+                        className="w-full px-4 py-2.5 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 transition duration-150"
+                        placeholder="Tell us about yourself and your passions..."
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Languages */}
-              <div>
-                <h2 className="text-xl font-bold mb-4">Languages</h2>
-                
-                <div className="flex gap-2 mb-3">
-                  <Input
-                    value={languageInput}
-                    onChange={(e) => setLanguageInput(e.target.value)}
-                    placeholder="e.g., English, Spanish, French"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addLanguage();
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    onClick={addLanguage}
-                    variant="outline"
-                  >
-                    Add
-                  </Button>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {formData.languages.map((lang, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2"
+                {/* Languages */}
+                <div>
+                  <h2 className="text-xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Languages 🗣️</h2>
+                  
+                  <div className="flex gap-2 mb-3">
+                    <DarkInput
+                      value={languageInput}
+                      onChange={(e: any) => setLanguageInput(e.target.value)}
+                      placeholder="e.g., English, Spanish, French"
+                      onKeyPress={(e: any) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addLanguage();
+                        }
+                      }}
+                    />
+                    <AmberButton
+                      type="button"
+                      onClick={addLanguage}
+                      variant="outline"
+                      size="sm"
                     >
-                      {lang}
-                      <button
-                        type="button"
-                        onClick={() => removeLanguage(lang)}
-                        className="text-blue-600 hover:text-blue-800"
+                      <FiPlus className="mr-1" /> Add
+                    </AmberButton>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {formData.languages.map((lang, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-sky-800/40 text-sky-300 rounded-full text-sm flex items-center gap-2 border border-sky-700"
                       >
-                        ×
-                      </button>
-                    </span>
-                  ))}
+                        {lang}
+                        <button
+                          type="button"
+                          onClick={() => removeLanguage(lang)}
+                          className="text-sky-400 hover:text-sky-200 transition"
+                        >
+                          <FiX />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Guide-Specific Fields */}
               {currentUser?.role === 'GUIDE' && (
-                <>
+                <div className='space-y-6'>
+                  <h2 className="text-xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Guide Details 🌟</h2>
+
                   {/* Expertise */}
                   <div>
-                    <h2 className="text-xl font-bold mb-4">Expertise</h2>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-300">Areas of Expertise</h3>
                     
                     <div className="flex gap-2 mb-3">
-                      <Input
+                      <DarkInput
                         value={expertiseInput}
-                        onChange={(e) => setExpertiseInput(e.target.value)}
+                        onChange={(e: any) => setExpertiseInput(e.target.value)}
                         placeholder="e.g., Food Tours, History, Photography"
-                        onKeyPress={(e) => {
+                        onKeyPress={(e: any) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
                             addExpertise();
                           }
                         }}
                       />
-                      <Button
+                      <AmberButton
                         type="button"
                         onClick={addExpertise}
                         variant="outline"
+                        size="sm"
                       >
-                        Add
-                      </Button>
+                        <FiPlus className="mr-1" /> Add
+                      </AmberButton>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 pt-2">
                       {formData.expertise.map((exp, idx) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center gap-2"
+                          className="px-3 py-1 bg-amber-800/40 text-amber-300 rounded-full text-sm flex items-center gap-2 border border-amber-700"
                         >
                           {exp}
                           <button
                             type="button"
                             onClick={() => removeExpertise(exp)}
-                            className="text-purple-600 hover:text-purple-800"
+                            className="text-amber-400 hover:text-amber-200 transition"
                           >
-                            ×
+                            <FiX />
                           </button>
                         </span>
                       ))}
@@ -278,55 +371,60 @@ export default function ProfileEditPage() {
                   </div>
 
                   {/* Daily Rate */}
-                  <Input
-                    label="Daily Rate ($)"
+                  <DarkInput
+                    label="Daily Rate ($ USD)"
                     name="dailyRate"
                     type="number"
                     value={formData.dailyRate}
                     onChange={handleChange}
                     placeholder="150"
-                  />
-                </>
-              )}
-
-              {/* Tourist-Specific Fields */}
-              {currentUser?.role === 'TOURIST' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Travel Preferences
-                  </label>
-                  <textarea
-                    name="travelPreferences"
-                    value={formData.travelPreferences}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., Adventure, Food, Culture, Photography"
+                    min="0"
                   />
                 </div>
               )}
 
+              {/* Tourist-Specific Fields */}
+              {currentUser?.role === 'TOURIST' && (
+                <div className='space-y-6'>
+                  <h2 className="text-xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Travel Preferences 🗺️</h2>
+                  <div>
+                    <label htmlFor="travelPreferences" className="block text-sm font-medium text-gray-300 mb-1">
+                      Travel Interests
+                    </label>
+                    <textarea
+                      id="travelPreferences"
+                      name="travelPreferences"
+                      value={formData.travelPreferences}
+                      onChange={handleChange}
+                      rows={3}
+                      className="w-full px-4 py-2.5 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 transition duration-150"
+                      placeholder="e.g., Adventure, Food, Culture, Photography"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
-              <div className="flex gap-4 pt-6 border-t">
-                <Button
+              <div className="flex gap-4 pt-6 border-t border-gray-700">
+                <AmberButton
                   type="button"
                   variant="secondary"
                   onClick={() => router.back()}
                   className="flex-1"
                 >
                   Cancel
-                </Button>
-                <Button
+                </AmberButton>
+                <AmberButton
                   type="submit"
                   isLoading={saving}
                   className="flex-1"
                 >
-                  Save Changes
-                </Button>
+                  <FiSave className="mr-2" /> Save Changes
+                </AmberButton>
               </div>
             </form>
-          </CardBody>
-        </Card>
+          </DarkCardBody>
+        </DarkCard>
       </div>
     </div>
   );

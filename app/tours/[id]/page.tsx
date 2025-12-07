@@ -1,80 +1,49 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { Listing, Review } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
-import Button from '@/components/ui/Button'; // Assuming your Button component supports dark/monochrome styling
-import { FiStar, FiClock, FiMapPin } from 'react-icons/fi';
-import { formatCurrency } from '@/lib/utils';
+import Button from '@/components/ui/Button';
+import PaymentButton from '@/app/payment/cancelled/page'; 
+import { FiStar, FiClock, FiMapPin, FiUsers, FiCalendar, FiDollarSign, FiShare2, FiHeart, FiAlertCircle } from 'react-icons/fi';
+import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import Loading from '@/components/shared/Loading';
-
-
-
-const MonochromaticButton = ({ children, onClick, className, size, isLoading, ...props }: any) => (
-  <button
-    onClick={onClick}
-    disabled={isLoading}
-    className={`
-      ${className} 
-      ${size === 'lg' ? 'px-8 py-3 text-lg' : 'px-6 py-2 text-base'}
-      bg-black text-white 
-      hover:bg-gray-800 
-      disabled:bg-gray-700 disabled:text-gray-400
-      font-semibold rounded-lg transition duration-200 ease-in-out
-      flex items-center justify-center
-    `}
-    {...props}
-  >
-    {isLoading ? (
-      <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-    ) : children}
-  </button>
-);
-
+import Card, { CardBody } from '@/components/ui/Card';
 
 export default function TourDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
-
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookingDate, setBookingDate] = useState('');
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [booking, setBooking] = useState(false);
-  const [minDate, setMinDate] = useState('');
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  // Set client-only min date
   useEffect(() => {
-    setMinDate(new Date().toISOString().split('T')[0]);
-  }, []);
-
-  // Fetch listing from API
-  useEffect(() => {
-    if (!params.id) return;
-
-    const fetchListing = async () => {
-      try {
-        const response = await api.get(`/listings/${params.id}`);
-        setListing(response.data.data);
-      } catch (error: any) {
-        toast.error(error.response?.data?.message || 'Tour not found');
-        setListing(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchListing();
   }, [params.id]);
+
+  const fetchListing = async () => {
+    try {
+      const response = await api.get(`/listings/${params.id}`);
+      setListing(response.data.data);
+    } catch (error) {
+      toast.error('Failed to load tour details');
+      router.push('/explore');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBooking = async () => {
     if (!isAuthenticated) {
@@ -83,24 +52,35 @@ export default function TourDetailsPage() {
       return;
     }
 
+    if (user?.role !== 'TOURIST') {
+      toast.error('Only tourists can book tours');
+      return;
+    }
+
     if (!bookingDate) {
       toast.error('Please select a date');
       return;
     }
 
-    if (!listing) return;
+    if (numberOfPeople < 1 || numberOfPeople > listing!.maxGroupSize) {
+      toast.error(`Number of people must be between 1 and ${listing!.maxGroupSize}`);
+      return;
+    }
 
     try {
       setBooking(true);
-      await api.post('/bookings', {
-        listingId: listing.id,
-        guideId: listing.guideId,
-        bookingDate,
+      const response = await api.post('/bookings', {
+        listingId: listing!.id,
+        guideId: listing!.guideId,
+        bookingDate: new Date(bookingDate).toISOString(),
         numberOfPeople,
-        totalAmount: listing.tourFee * numberOfPeople,
+        totalAmount: listing!.tourFee * numberOfPeople,
       });
-      toast.success('Booking request sent!');
-      router.push('/dashboard/tourist');
+
+      const bookingId = response.data.data.id;
+      setCreatedBookingId(bookingId);
+      setShowPayment(true);
+      toast.success('Booking created! Please complete payment.');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Booking failed');
     } finally {
@@ -108,146 +88,439 @@ export default function TourDetailsPage() {
     }
   };
 
+  const shareUrl = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: listing?.title,
+        text: listing?.description,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    }
+  };
+
+  const calculateTotalPrice = () => {
+    return listing ? listing.tourFee * numberOfPeople : 0;
+  };
+
+  const calculateAverageRating = () => {
+    if (!listing?.reviews || listing.reviews.length === 0) return 0;
+    const sum = listing.reviews.reduce((acc, review) => acc + review.rating, 0);
+    return (sum / listing.reviews.length).toFixed(1);
+  };
+
   if (loading) return <Loading />;
-  if (!listing) return <div className="text-center mt-20 text-gray-800">Tour not found</div>;
+  if (!listing) return <div className="container-custom py-20">Tour not found</div>;
+
+  const avgRating = calculateAverageRating();
+  const minDate = new Date().toISOString().split('T')[0];
 
   return (
-    // Updated background to dark gray/off-black
-    <div className="min-h-screen bg-gray-900 text-gray-100 py-16">
-      <div className="container-custom mx-auto px-4 md:px-8">
-        
-        {/* Images */}
-        <div className="grid md:grid-cols-2 gap-4 mb-12">
-          {/* Main Image - Higher Contrast Look */}
-          <Image
-            src={listing.images[0] || '/placeholder.jpg'}
-            alt={listing.title}
-            width={1000}
-            height={600}
-            className="w-full h-96 object-cover rounded-xl shadow-2xl transition duration-300 hover:opacity-90"
-          />
-          {/* Gallery Images */}
-          <div className="grid grid-cols-2 gap-4">
-            {listing.images.slice(1, 5).map((img, idx) => (
-              <Image
-                key={idx}
-                src={img}
-                alt={`Tour ${idx + 2}`}
-                width={500}
-                height={300}
-                className="w-full h-44 object-cover rounded-lg shadow-lg opacity-90 hover:opacity-100 transition duration-200"
+    <div className="min-h-screen bg-gray-50">
+      {/* Image Gallery */}
+      <div className="bg-black">
+        <div className="container-custom">
+          <div className="grid md:grid-cols-2 gap-2 py-2">
+            {/* Main Image */}
+            <div className="md:col-span-1">
+              <img
+                src={listing.images[selectedImage] || '/placeholder.jpg'}
+                alt={listing.title}
+                className="w-full h-96 md:h-[500px] object-cover rounded-lg cursor-pointer"
+                onClick={() => setSelectedImage(selectedImage)}
               />
-            ))}
+            </div>
+
+            {/* Thumbnail Grid */}
+            <div className="grid grid-cols-2 gap-2">
+              {listing.images.slice(0, 4).map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`Tour ${idx + 1}`}
+                  className={`w-full h-48 md:h-[246px] object-cover rounded-lg cursor-pointer transition ${
+                    selectedImage === idx ? 'ring-4 ring-blue-500' : 'hover:opacity-80'
+                  }`}
+                  onClick={() => setSelectedImage(idx)}
+                />
+              ))}
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Main content */}
-          <div className="lg:col-span-2">
-            <h1 className="text-5xl font-extrabold mb-4 text-white">{listing.title}</h1>
-
-            {/* Tour Info */}
-            <div className="flex flex-wrap items-center gap-6 mb-8 text-gray-400">
-              <div className="flex items-center gap-2">
-                <FiStar className="text-yellow-500 text-lg" /> {/* Keep star gold for contrast/rating */}
-                <span className="font-medium">4.8 (23 reviews)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FiMapPin className="text-gray-500 text-lg" />
-                <span className="font-medium">{listing.city}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FiClock className="text-gray-500 text-lg" />
-                <span className="font-medium">{listing.duration} hours</span>
-              </div>
-            </div>
-
-            {/* About Section - Dark Card */}
-            <div className="bg-gray-800 rounded-xl p-8 mb-8 shadow-xl border border-gray-700">
-              <h2 className="text-3xl font-bold mb-5 text-white">About this experience</h2>
-              <p className="text-gray-300 leading-relaxed text-lg">{listing.description}</p>
-            </div>
-
-            {/* Itinerary Section - Dark Card */}
-            {listing.itinerary && (
-              <div className="bg-gray-800 rounded-xl p-8 mb-8 shadow-xl border border-gray-700">
-                <h2 className="text-3xl font-bold mb-5 text-white">Itinerary</h2>
-                <pre className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans text-lg">
-                  {listing.itinerary}
-                </pre>
-              </div>
-            )}
-            
-            {/* Guide Info (Placeholder for completeness) */}
-             <div className="mt-12 pt-6 border-t border-gray-700">
-                <h3 className="text-2xl font-bold text-white mb-4">Your Guide</h3>
-                <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center text-lg font-semibold">G</div>
-                    <p className="text-gray-300">Guided by  <strong>{listing.guide.name}</strong> - <span className='text-gray-400'>Certified Local Expert</span></p>
+      <div className="container-custom py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Header */}
+            <div>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full mb-3">
+                    {listing.category}
+                  </span>
+                  <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                    {listing.title}
+                  </h1>
+                  <div className="flex items-center gap-6 text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <FiStar className="text-yellow-500 fill-current" />
+                      <span className="font-semibold">{avgRating}</span>
+                      <span>({listing.reviews?.length || 0} reviews)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FiMapPin className="text-blue-600" />
+                      <span>{listing.city}</span>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Share & Favorite */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={shareUrl}
+                    className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    <FiShare2 />
+                  </button>
+                  <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <FiHeart />
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Info */}
+              <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 rounded-xl">
+                <div className="text-center">
+                  <FiClock className="mx-auto text-blue-600 mb-2" size={24} />
+                  <div className="text-sm text-gray-600">Duration</div>
+                  <div className="font-bold">{listing.duration} hours</div>
+                </div>
+                <div className="text-center">
+                  <FiUsers className="mx-auto text-blue-600 mb-2" size={24} />
+                  <div className="text-sm text-gray-600">Group Size</div>
+                  <div className="font-bold">Max {listing.maxGroupSize}</div>
+                </div>
+                <div className="text-center">
+                  <FiDollarSign className="mx-auto text-blue-600 mb-2" size={24} />
+                  <div className="text-sm text-gray-600">Price</div>
+                  <div className="font-bold">{formatCurrency(listing.tourFee)}</div>
+                </div>
+              </div>
             </div>
+
+            {/* About */}
+            <Card>
+              <CardBody>
+                <h2 className="text-2xl font-bold mb-4">About this experience</h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {listing.description}
+                </p>
+              </CardBody>
+            </Card>
+
+            {/* Itinerary */}
+            {listing.itinerary && (
+              <Card>
+                <CardBody>
+                  <h2 className="text-2xl font-bold mb-4">What we'll do</h2>
+                  <div className="space-y-3">
+                    {listing.itinerary.split('\n').map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                          <span className="text-blue-600 font-semibold text-sm">
+                            {idx + 1}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 pt-1">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {/* Meeting Point */}
+            <Card>
+              <CardBody>
+                <h2 className="text-2xl font-bold mb-4">Where we'll meet</h2>
+                <div className="flex items-start gap-3">
+                  <FiMapPin className="text-blue-600 mt-1" size={24} />
+                  <div>
+                    <p className="font-semibold text-gray-900">{listing.meetingPoint}</p>
+                    <p className="text-gray-600 text-sm mt-1">
+                      Exact location will be shared after booking confirmation
+                    </p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* Your Guide */}
+            <Card>
+              <CardBody>
+                <h2 className="text-2xl font-bold mb-4">Meet your guide</h2>
+                <div className="flex items-start gap-4">
+                  {listing.guide.profilePic ? (
+                    <img
+                      src={listing.guide.profilePic}
+                      alt={listing.guide.name}
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                      {getInitials(listing.guide.name || 'Guide')}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-bold text-xl mb-1">{listing.guide.name}</h3>
+                    {listing.guide.bio && (
+                      <p className="text-gray-600 mb-3">{listing.guide.bio}</p>
+                    )}
+                    {listing.guide.languages && listing.guide.languages.length > 0 && (
+                      <div className="mb-2">
+                        <span className="text-sm text-gray-500">Languages: </span>
+                        <span className="text-sm">{listing.guide.languages.join(', ')}</span>
+                      </div>
+                    )}
+                    {listing.guide.expertise && listing.guide.expertise.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {listing.guide.expertise.map((exp, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full"
+                          >
+                            {exp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <Link href={`/profile/${listing.guide.id}`} className="mt-4 inline-block">
+                      <Button variant="outline" size="sm">
+                        View Profile
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* Reviews */}
+            <Card>
+              <CardBody>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold">Reviews</h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <FiStar className="text-yellow-500 fill-current" />
+                      <span className="font-semibold">{avgRating}</span>
+                      <span className="text-gray-500">
+                        · {listing.reviews?.length || 0} reviews
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {listing.reviews && listing.reviews.length > 0 ? (
+                  <div className="space-y-6">
+                    {listing.reviews.map((review: Review) => (
+                      <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
+                        <div className="flex items-start gap-4">
+                          {review.tourist.profilePic ? (
+                            <img
+                              src={review.tourist.profilePic}
+                              alt={review.tourist.name}
+                              className="w-12 h-12 rounded-full"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+                              {getInitials(review.tourist.name || 'User')}
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <p className="font-semibold">{review.tourist.name}</p>
+                                <p className="text-sm text-gray-500">
+                                  {formatDate(review.createdAt)}
+                                </p>
+                              </div>
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <FiStar
+                                    key={i}
+                                    size={16}
+                                    className={
+                                      i < review.rating
+                                        ? 'text-yellow-500 fill-current'
+                                        : 'text-gray-300'
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-gray-700">{review.comment}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FiStar size={48} className="mx-auto mb-3 text-gray-300" />
+                    <p>No reviews yet. Be the first to review this tour!</p>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
           </div>
 
-          {/* Booking widget */}
+          {/* Booking Sidebar */}
           <div className="lg:col-span-1">
-            {/* Booking Card - High Contrast White/Light Card */}
-            <div className="bg-white rounded-xl shadow-2xl p-6 sticky top-24 text-gray-800 border border-gray-200">
-              <div className="mb-6 border-b pb-4">
-                <span className="text-4xl font-extrabold text-black">
-                  {formatCurrency(listing.tourFee)}
-                </span>
-                <span className="text-gray-600"> / person</span>
+            <div className="sticky top-24">
+              <Card>
+                <CardBody className="p-6">
+                  {/* Price */}
+                  <div className="mb-6 pb-6 border-b">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-blue-600">
+                        {formatCurrency(listing.tourFee)}
+                      </span>
+                      <span className="text-gray-500">/ person</span>
+                    </div>
+                  </div>
+
+                  {/* Booking Form */}
+                  {!showPayment ? (
+                    <div className="space-y-4">
+                      {/* Date */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FiCalendar className="inline mr-2" />
+                          Select Date
+                        </label>
+                        <input
+                          type="date"
+                          value={bookingDate}
+                          onChange={(e) => setBookingDate(e.target.value)}
+                          min={minDate}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      {/* Number of People */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FiUsers className="inline mr-2" />
+                          Number of People
+                        </label>
+                        <input
+                          type="number"
+                          value={numberOfPeople}
+                          onChange={(e) => setNumberOfPeople(parseInt(e.target.value) || 1)}
+                          min={1}
+                          max={listing.maxGroupSize}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Maximum {listing.maxGroupSize} people
+                        </p>
+                      </div>
+
+                      {/* Price Breakdown */}
+                      <div className="border-t border-gray-200 pt-4 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {formatCurrency(listing.tourFee)} x {numberOfPeople} {numberOfPeople === 1 ? 'person' : 'people'}
+                          </span>
+                          <span className="font-semibold">
+                            {formatCurrency(calculateTotalPrice())}
+                          </span>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                          <span>Total</span>
+                          <span>{formatCurrency(calculateTotalPrice())}</span>
+                        </div>
+                      </div>
+
+                      {/* Book Button */}
+                      <Button
+                        onClick={handleBooking}
+                        isLoading={booking}
+                        size="lg"
+                        className="w-full"
+                        disabled={!bookingDate}
+                      >
+                        {booking ? 'Creating Booking...' : 'Request to Book'}
+                      </Button>
+
+                      <p className="text-xs text-gray-500 text-center">
+                        You won't be charged yet
+                      </p>
+                    </div>
+                  ) : (
+                    /* Payment Section */
+                    <div className="space-y-4">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <div className="flex items-start gap-3">
+                          <FiAlertCircle className="text-green-600 mt-0.5" />
+                          <div>
+                            <p className="font-semibold text-green-900">Booking Created!</p>
+                            <p className="text-sm text-green-700">
+                              Please complete payment to confirm your booking.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-200 pt-4">
+                        <div className="flex justify-between font-bold text-lg mb-4">
+                          <span>Amount to Pay</span>
+                          <span>{formatCurrency(calculateTotalPrice())}</span>
+                        </div>
+
+                        <PaymentButton
+                          bookingId={createdBookingId!}
+                          amount={calculateTotalPrice()}
+                        />
+
+                        <button
+                          onClick={() => setShowPayment(false)}
+                          className="w-full mt-3 text-sm text-gray-600 hover:text-gray-900"
+                        >
+                          Change booking details
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+
+              {/* Trust Badges */}
+              <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+                <h3 className="font-semibold mb-3 text-sm">Why book with us?</h3>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li className="flex items-start gap-2">
+                    <FiStar className="text-blue-600 mt-0.5" size={16} />
+                    <span>Verified local guides</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FiStar className="text-blue-600 mt-0.5" size={16} />
+                    <span>Secure payment processing</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FiStar className="text-blue-600 mt-0.5" size={16} />
+                    <span>24/7 customer support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FiStar className="text-blue-600 mt-0.5" size={16} />
+                    <span>Free cancellation (24h notice)</span>
+                  </li>
+                </ul>
               </div>
-
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-700">Date</label>
-                  <input
-                    type="date"
-                    value={bookingDate}
-                    onChange={(e) => setBookingDate(e.target.value)}
-                    min={minDate}
-                    // Input style adjusted for light background
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-700">Number of people</label>
-                  <input
-                    type="number"
-                    value={numberOfPeople}
-                    onChange={(e) => setNumberOfPeople(parseInt(e.target.value))}
-                    min={1}
-                    max={listing.maxGroupSize}
-                    // Input style adjusted for light background
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                  />
-                </div>
-              </div>
-
-              <div className="border-t pt-4 mb-6">
-                <div className="flex justify-between mb-2 text-lg">
-                  <span className='font-semibold'>Total</span>
-                  <span className="font-extrabold text-black">
-                    {formatCurrency(listing.tourFee * numberOfPeople)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Use the Monochromatic Button */}
-              <MonochromaticButton
-                onClick={handleBooking}
-                className="w-full"
-                size="lg"
-                isLoading={booking}
-              >
-                Request to Book
-              </MonochromaticButton>
-
-              <p className="text-xs text-gray-500 text-center mt-4">
-                Your card will not be charged yet
-              </p>
             </div>
           </div>
         </div>
