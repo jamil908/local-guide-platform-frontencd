@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -13,6 +12,7 @@ import Button from '@/components/ui/Button';
 import Card, { CardBody, CardHeader } from '@/components/ui/Card';
 import Loading from '@/components/shared/Loading';
 import toast from 'react-hot-toast';
+import ReviewModal from '@/components/ui/ReviewModal';
 
 export default function TouristDashboard() {
   const { user, isAuthenticated } = useAuth();
@@ -20,6 +20,8 @@ export default function TouristDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -66,7 +68,7 @@ export default function TouristDashboard() {
   const pastBookings = bookings.filter(
     (b) => new Date(b.bookingDate) < new Date() || b.status === 'COMPLETED' || b.status === 'CANCELLED'
   );
-
+console.log(bookings)
   if (loading) return <Loading />;
 
   return (
@@ -257,13 +259,24 @@ export default function TouristDashboard() {
                           </Button>
                         </Link>
                         
-                        {booking.status === 'COMPLETED' && (
-                          <Link href={`/tours/${booking.listingId}#review`}>
-                            <Button size="sm">
-                              <FiStar className="mr-2" />
-                              Write Review
-                            </Button>
-                          </Link>
+                        {booking.status === 'CONFIRMED' && !booking.review && (
+                          <Button 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedBooking(booking);
+                              setReviewModalOpen(true);
+                            }}
+                          >
+                            <FiStar className="mr-2" />
+                            Write Review
+                          </Button>
+                        )}
+
+                        {booking.status === 'COMPLETED' && booking.review && (
+                          <Button variant="outline" size="sm" disabled>
+                            <FiStar className="mr-2 text-yellow-500 fill-current" />
+                            Reviewed
+                          </Button>
                         )}
                         
                         {booking.status === 'PENDING' && (
@@ -280,6 +293,23 @@ export default function TouristDashboard() {
           )}
         </div>
       </div>
+
+      {/* Review Modal */}
+      {selectedBooking && (
+        <ReviewModal
+          isOpen={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          bookingId={selectedBooking.id}
+          listingId={selectedBooking.listingId}
+          listingTitle={selectedBooking.listing?.title || 'Tour'}
+          onReviewSubmitted={() => {
+            fetchBookings(); // Refresh bookings
+          }}
+        />
+      )}
     </div>
   );
 }
