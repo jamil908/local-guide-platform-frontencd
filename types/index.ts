@@ -40,6 +40,7 @@ export interface Listing {
 }
 
 export interface Booking {
+ review?: Review; 
   id: string;
   bookingDate: string;
   status: BookingStatus;
@@ -51,6 +52,7 @@ export interface Booking {
   tourist?: Partial<User>;
   guideId: string;
   guide?: Partial<User>;
+  
   listingId: string;
   listing?: Listing;
   createdAt: string;

@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiX, FiStar } from 'react-icons/fi';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -16,6 +15,12 @@ interface ReviewModalProps {
   listingId: string;
   listingTitle: string;
   onReviewSubmitted: () => void;
+  existingReview?: {
+    id: string;
+    rating: number;
+    comment: string;
+  } | null;
+  mode?: 'create' | 'edit';
 }
 
 export default function ReviewModal({
@@ -25,11 +30,24 @@ export default function ReviewModal({
   listingId,
   listingTitle,
   onReviewSubmitted,
+  existingReview = null,
+  mode = 'create',
 }: ReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Load existing review data when editing
+  useEffect(() => {
+    if (existingReview && mode === 'edit') {
+      setRating(existingReview.rating);
+      setComment(existingReview.comment);
+    } else {
+      setRating(0);
+      setComment('');
+    }
+  }, [existingReview, mode, isOpen]);
 
   if (!isOpen) return null;
 
@@ -49,14 +67,24 @@ export default function ReviewModal({
     setSubmitting(true);
 
     try {
-      await api.post('/reviews', {
-        listingId,
-        bookingId,
-        rating,
-        comment: comment.trim(),
-      });
+      if (mode === 'edit' && existingReview) {
+        // Update existing review
+        await api.patch(`/reviews/${existingReview.id}`, {
+          rating,
+          comment: comment.trim(),
+        });
+        toast.success('Review updated successfully!');
+      } else {
+        // Create new review
+        await api.post('/reviews', {
+          listingId,
+          bookingId,
+          rating,
+          comment: comment.trim(),
+        });
+        toast.success('Review submitted successfully!');
+      }
 
-      toast.success('Review submitted successfully!');
       onReviewSubmitted();
       onClose();
       
@@ -81,7 +109,9 @@ export default function ReviewModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Write a Review</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {mode === 'edit' ? 'Edit Your Review' : 'Write a Review'}
+            </h2>
             <p className="text-gray-600 text-sm mt-1">{listingTitle}</p>
           </div>
           <button
@@ -157,18 +187,21 @@ export default function ReviewModal({
             </div>
           </div>
 
-          {/* Tips */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-sm text-blue-900 mb-2">
-              💡 Review Tips:
-            </h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Be specific about what you liked or didn't like</li>
-              <li>• Mention the guide's knowledge and friendliness</li>
-              <li>• Describe the tour highlights</li>
-              <li>• Be honest but respectful</li>
-            </ul>
-          </div>
+          {/* Tips (only show for new reviews) */}
+          {mode === 'create' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-sm text-blue-900 mb-2">
+                💡 Review Tips:
+              </h3>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Be specific about what you liked or didn't like</li>
+                
+                <li>• Mention the guide's knowledge and friendliness</li>
+                <li>• Describe the tour highlights</li>
+                <li>• Be honest but respectful</li>
+              </ul>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-3 pt-4 border-t">
@@ -186,7 +219,10 @@ export default function ReviewModal({
               isLoading={submitting}
               className="flex-1"
             >
-              {submitting ? 'Submitting...' : 'Submit Review'}
+              {submitting 
+                ? (mode === 'edit' ? 'Updating...' : 'Submitting...') 
+                : (mode === 'edit' ? 'Update Review' : 'Submit Review')
+              }
             </Button>
           </div>
         </form>
