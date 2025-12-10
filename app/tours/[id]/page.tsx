@@ -59,7 +59,7 @@ export default function TourDetailsPage() {
   const handleBooking = async () => {
     if (!isAuthenticated) {
       toast.error('Please login to book');
-      router.push('/login');
+      router.push('/auth/login');
       return;
     }
 

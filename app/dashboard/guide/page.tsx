@@ -73,7 +73,7 @@ export default function GuideDashboard() {
   useEffect(() => {
   // Check authentication status
   if (!isAuthenticated) {
-    router.push('/login');
+    router.push('/auth/login');
     return;
   }
 

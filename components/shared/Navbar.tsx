@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { FiMenu, FiX, FiUser, FiLogOut, FiCompass } from 'react-icons/fi';
+import { FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -38,10 +38,10 @@ export default function Navbar() {
             
             {!user ? (
               <>
-                <Link href="/register?role=guide" className="text-gray-700 hover:text-blue-600 transition">
+                <Link href="/auth/register?role=guide" className="text-gray-700 hover:text-blue-600 transition">
                   Become a Guide
                 </Link>
-                <Link href="auth/login" className="text-gray-700 hover:text-blue-600 transition">
+                <Link href="/auth/login" className="text-gray-700 hover:text-blue-600 transition">
                   Login
                 </Link>
                 <Link
@@ -96,27 +96,71 @@ export default function Navbar() {
         {isOpen && (
           <div className="md:hidden pb-4">
             <div className="flex flex-col space-y-4">
-              <Link href="/explore" className="text-gray-700 hover:text-blue-600">
+              <Link 
+                href="/explore" 
+                className="text-gray-700 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
                 Explore Tours
               </Link>
               {!user ? (
                 <>
-                  <Link href="/register?role=guide" className="text-gray-700 hover:text-blue-600">
+                  <Link 
+                    href="/auth/register?role=guide" 
+                    className="text-gray-700 hover:text-blue-600"
+                    onClick={() => setIsOpen(false)}
+                  >
                     Become a Guide
                   </Link>
-                  <Link href="/auth/login" className="text-gray-700 hover:text-blue-600">
+                  <Link 
+                    href="/auth/login" 
+                    className="text-gray-700 hover:text-blue-600"
+                    onClick={() => setIsOpen(false)}
+                  >
                     Login
                   </Link>
-                  <Link href="/auth/register" className="text-blue-600 font-semibold">
+                  <Link 
+                    href="/auth/register" 
+                    className="text-blue-600 font-semibold"
+                    onClick={() => setIsOpen(false)}
+                  >
                     Sign Up
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link href="/dashboard" className="text-gray-700 hover:text-blue-600">
-                    Dashboard
-                  </Link>
-                  <Link href={`/profile/${user.id}`} className="text-gray-700 hover:text-blue-600">
+                  {user.role === 'TOURIST' && (
+                    <Link 
+                      href="/dashboard/tourist" 
+                      className="text-gray-700 hover:text-blue-600"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      My Bookings
+                    </Link>
+                  )}
+                  {user.role === 'GUIDE' && (
+                    <Link 
+                      href="/dashboard/guide" 
+                      className="text-gray-700 hover:text-blue-600"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  )}
+                  {user.role === 'ADMIN' && (
+                    <Link 
+                      href="/dashboard/admin" 
+                      className="text-gray-700 hover:text-blue-600"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
+                  <Link 
+                    href={`/profile/${user.id}`} 
+                    className="text-gray-700 hover:text-blue-600"
+                    onClick={() => setIsOpen(false)}
+                  >
                     Profile
                   </Link>
                   <button onClick={handleLogout} className="text-left text-red-600">

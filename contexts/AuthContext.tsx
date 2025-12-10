@@ -32,9 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = (token: string) => {
+  const login = async(token: string) => {
     saveToken(token);
-    const userData = getUser();
+    const userData = await getUser();
     setUser(userData);
   };
 
