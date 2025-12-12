@@ -287,7 +287,7 @@ export default function LoginPage() {
             <div className="text-xs text-amber-100 space-y-1">
               <p>Tourist: <span className="font-mono">tourist@test.com</span> / <span className="font-mono">password123</span></p>
               <p>Guide: <span className="font-mono">guide@test.com</span> / <span className="font-mono">password123</span></p>
-              <p>Admin: <span className="font-mono">admin@localguide.com</span> / <span className="font-mono">admin123</span></p>
+              <p>Admin: <span className="font-mono">localguide@admin.com</span> / <span className="font-mono">addmin123</span></p>
             </div>
           </div>
 
