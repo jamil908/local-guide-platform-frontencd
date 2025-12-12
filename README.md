@@ -1,69 +1,133 @@
-🗺️ LocalGuide Platform - Frontend
-Modern, responsive web application for connecting travelers with local guides.
-🔗 Live Demo
-Website: https://your-app.vercel.app
-🛠️ Technology Stack
+# 🗺️ LocalGuide Platform - Frontend
 
-Framework: Next.js 14 (App Router)
-Language: TypeScript
-Styling: Tailwind CSS
-State Management: React Context API
-HTTP Client: Axios
-Icons: React Icons (Feather Icons)
-Notifications: React Hot Toast
-Date Formatting: date-fns
-JWT Decoding: jwt-decode
+Modern, responsive web application for connecting travelers with local tour guides.
 
-✨ Features
-For Tourists
+## 🚀 Live Demo
+**Production:** https://your-app.onrender.com
+**Backend API:** https://your-backend.onrender.com
 
-🔍 Browse and search tours
-📅 Book tours with guides
-💳 Secure payment (SSLCommerz)
-⭐ Write reviews and ratings
-📊 Booking dashboard
-👤 Profile management
+## 🎥 Video Demo
+[Watch Full Demo (English)](https://drive.google.com/your-video-link)
 
-For Guides
+## ✨ Features
 
-📝 Create and manage tour listings
-🖼️ Upload tour images (Cloudinary)
-📋 Manage bookings
-✅ Accept/reject booking requests
-💰 Track earnings
-👤 Profile with expertise showcase
+### For Tourists
+- 🔍 Browse and search tours by location, category, and price
+- 📅 Book tours with local guides
+- 💳 Secure payment via SSLCommerz
+- ⭐ Write and edit reviews
+- 📊 View booking history
 
-For Admins
+### For Guides
+- ➕ Create and manage tour listings
+- 🖼️ Upload tour images
+- 📋 Manage bookings
+- ✅ Accept or decline booking requests
+- 📈 View earnings and statistics
 
-👥 User management
-🗂️ Listing moderation
-📊 Booking oversight
-🗑️ Delete users/listings
-📈 Platform statistics
+### For Admins
+- 👥 User management
+- 🗺️ Listing moderation
+- 📊 View all bookings and statistics
 
-📁 Project Structure
+## 🛠️ Tech Stack
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **State Management:** React Context API
+- **HTTP Client:** Axios
+- **Form Handling:** React Hook Form
+- **Notifications:** React Hot Toast
+- **Icons:** React Icons
+- **Date Handling:** date-fns
+
+## 📦 Installation
+
+### Prerequisites
+- Node.js 18 or higher
+- npm or yarn
+- Backend API running
+
+### Setup Steps
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/localguide-frontend.git
+cd localguide-frontend
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Environment Configuration**
+```bash
+cp .env.local.example .env.local
+```
+
+Edit `.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_APP_NAME=LocalGuide Platform
+```
+
+4. **Start Development Server**
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+## 🎨 Key Features Walkthrough
+
+### Home Page (7+ Sections)
+1. **Hero Section** - Search bar and call-to-action
+2. **How It Works** - 3-step process explanation
+3. **Categories** - Popular tour categories
+4. **Featured Destinations** - Top cities with guide count
+5. **Why Choose Us** - Platform benefits
+6. **Testimonials** - User reviews
+7. **Become a Guide CTA** - Guide recruitment section
+
+### Tour Discovery
+- Advanced search with filters
+- Real-time search results
+- Category-based filtering
+- Price range filters
+- City-based search
+
+### Booking Flow
+1. Select tour and date
+2. Choose number of people
+3. View price breakdown
+4. Create booking
+5. Complete payment via SSLCommerz
+6. Receive confirmation
+
+### Review System
+- Write reviews after tour completion
+- 5-star rating system
+- Edit and delete own reviews
+- View all reviews on tour page
+
+## 📁 Project Structure
+```
 frontend/
 ├── app/
 │   ├── (auth)/
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx
+│   │   ├── login/
+│   │   └── register/
 │   ├── dashboard/
-│   │   ├── tourist/page.tsx
+│   │   ├── tourist/
 │   │   ├── guide/
-│   │   │   ├── page.tsx
-│   │   │   ├── create-listing/page.tsx
-│   │   │   └── edit/[id]/page.tsx
-│   │   └── admin/page.tsx
-│   ├── explore/page.tsx
-│   ├── tours/[id]/page.tsx
+│   │   └── admin/
+│   ├── explore/
+│   ├── tours/[id]/
 │   ├── profile/[id]/
-│   │   ├── page.tsx
-│   │   └── edit/page.tsx
 │   ├── payment/
-│   │   ├── success/page.tsx
-│   │   └── failed/page.tsx
 │   ├── layout.tsx
-│   ├── page.tsx              # Home page
+│   ├── page.tsx
 │   └── globals.css
 ├── components/
 │   ├── ui/
@@ -71,7 +135,6 @@ frontend/
 │   │   ├── Input.tsx
 │   │   ├── Card.tsx
 │   │   ├── ImageUpload.tsx
-│   │   ├── SingleImageUpload.tsx
 │   │   ├── ReviewModal.tsx
 │   │   └── PaymentButton.tsx
 │   └── shared/
@@ -79,234 +142,117 @@ frontend/
 │       ├── Footer.tsx
 │       └── Loading.tsx
 ├── contexts/
-│   └── AuthContext.tsx       # Authentication state
+│   └── AuthContext.tsx
 ├── lib/
-│   ├── api.ts                # Axios instance
-│   ├── auth.ts               # Auth utilities
-│   └── utils.ts              # Helper functions
+│   ├── api.ts              # Axios configuration
+│   ├── auth.ts             # Auth helpers
+│   └── utils.ts            # Utility functions
 ├── types/
-│   └── index.ts              # TypeScript types
+│   └── index.ts            # TypeScript types
 ├── public/
 ├── .env.local.example
-└── README.md
-🚀 Getting Started
-Prerequisites
+└── package.json
+```
 
-Node.js (v18 or higher)
-npm or yarn
+## 🎯 User Flows
 
-Installation
+### Tourist Journey
+```
+Home → Explore Tours → Tour Details → Book → Pay → Confirm → Review
+```
 
-Clone the repository
+### Guide Journey
+```
+Register → Complete Profile → Create Listing → Manage Bookings → Earn
+```
 
-bashgit clone https://github.com/yourusername/localguide-frontend.git
-cd localguide-frontend
+### Admin Journey
+```
+Login → Dashboard → Manage Users/Listings/Bookings
+```
 
-Install dependencies
+## 🚀 Build & Deploy
 
-bashnpm install
+### Build for Production
+```bash
+npm run build
+```
 
-Environment Setup
+### Start Production Server
+```bash
+npm start
+```
 
-Create .env.local file:
-envNEXT_PUBLIC_API_URL=http://localhost:5000/api
-NEXT_PUBLIC_APP_NAME=LocalGuide Platform
+### Deploy to Render
+See [DEPLOYMENT.md](./DEPLOYMENT.md)
 
-Start Development Server
+## 🔐 Test Accounts
 
-bashnpm run dev
-Application will start at http://localhost:3000
-📄 Pages Overview
-Public Pages
+### Admin
+- Email: `admin@localguide.com`
+- Password: `admin123`
 
-/ - Home page (7 sections: Hero, How It Works, Categories, Destinations, Why Choose Us, Testimonials, CTA)
-/explore - Browse all tours with search and filters
-/tours/[id] - Tour details with booking
-/auth/login - User login
-/auth/register - User registration
+### Tourist
+- Email: `tourist@test.com`
+- Password: `tourist123`
 
-Protected Pages (Tourist)
+### Guide
+- Email: `guide@test.com`
+- Password: `guide123`
 
-/dashboard/tourist - My bookings dashboard
-/profile/[id] - User profile view
-/profile/[id]/edit - Edit profile
-/payment/success - Payment confirmation
-/payment/failed - Payment failure
+## 🎨 Design System
 
-Protected Pages (Guide)
+### Colors
+- Primary: Blue (#2563eb)
+- Secondary: Purple (#7c3aed)
+- Success: Green (#10b981)
+- Warning: Yellow (#f59e0b)
+- Error: Red (#ef4444)
 
-/dashboard/guide - Guide dashboard
-/dashboard/guide/create-listing - Create new tour
-/dashboard/guide/edit/[id] - Edit tour
+### Typography
+- Font: Inter (Google Fonts)
+- Headings: Bold, varying sizes
+- Body: Regular, 16px base
 
-Protected Pages (Admin)
+## 🧪 Testing
 
-/dashboard/admin - Admin panel
+### Manual Testing Checklist
+- [ ] User registration (Tourist, Guide)
+- [ ] Login/Logout functionality
+- [ ] Create tour listing (Guide)
+- [ ] Search and filter tours
+- [ ] Book a tour
+- [ ] Complete payment
+- [ ] Write/Edit/Delete review
+- [ ] Admin panel access
 
-🎨 Design System
-Color Palette
+## 📱 Responsive Design
+- Mobile: 320px - 767px
+- Tablet: 768px - 1023px
+- Desktop: 1024px+
 
-Primary: Blue (#2563eb)
-Secondary: Purple (#7c3aed)
-Success: Green (#10b981)
-Warning: Yellow (#f59e0b)
-Danger: Red (#ef4444)
+## 🐛 Troubleshooting
 
-Typography
+### API Connection Error
+Check if backend is running and `NEXT_PUBLIC_API_URL` is correct.
 
-Font Family: Inter (Google Fonts)
-Headings: Bold, 2xl-6xl
-Body: Regular, base
+### Build Errors
+```bash
+rm -rf .next node_modules
+npm install
+npm run build
+```
 
-Components
-All components use Tailwind CSS utility classes for consistent styling.
-🔐 Authentication Flow
+### Type Errors
+```bash
+npm run type-check
+```
 
-User registers/logs in
-JWT token stored in localStorage
-Token sent with API requests via Axios interceptors
-Protected routes check authentication
-Auto-redirect if not authenticated
+## 📄 License
+MIT
 
-📱 Responsive Design
-
-Mobile: < 768px
-Tablet: 768px - 1024px
-Desktop: > 1024px
-
-All pages are fully responsive with mobile-first approach.
-🧪 Testing
-Manual Testing Checklist
-Authentication:
-
- Register as Tourist
- Register as Guide
- Login with valid credentials
- Login with invalid credentials
- Logout
-
-Tourist Flow:
-
- Browse tours
- Search and filter
- View tour details
- Book a tour
- Complete payment
- Write review
- Edit review
- Delete review
-
-Guide Flow:
-
- Create tour listing
- Upload images
- Edit tour
- Delete tour
- View bookings
- Accept booking
- Reject booking
-
-Admin Flow:
-
- View all users
- Delete user
- View all listings
- Delete listing
- View all bookings
-
-🚀 Deployment
-Vercel Deployment (Recommended)
-
-Install Vercel CLI
-
-bashnpm install -g vercel
-
-Login and Deploy
-
-bashvercel login
-vercel
-
-Set Environment Variables
-Go to Vercel Dashboard → Project → Settings → Environment Variables:
-
-NEXT_PUBLIC_API_URL = https://your-backend-api.railway.app/api
-
-Deploy to Production
-
-bashvercel --prod
-Manual Deployment
-
-Build the application:
-
-bashnpm run build
-
-Start production server:
-
-bashnpm start
-📝 Scripts
-bashnpm run dev          # Start development server
-npm run build        # Build for production
-npm start            # Start production server
-npm run lint         # Run ESLint
-🎯 Key Features Implementation
-Search & Filter
-
-Real-time search by city
-Filter by category
-Price range filtering
-Results update instantly
-
-Image Upload
-
-Drag & drop support
-Multiple image upload
-Preview before upload
-Cloudinary integration
-
-Payment Integration
-
-SSLCommerz gateway
-Secure payment flow
-Success/failure handling
-Transaction tracking
-
-Review System
-
-Star rating (1-5)
-Written reviews
-Edit own reviews
-Delete own reviews
-
-🐛 Common Issues
-Issue: API connection failed
-
-Check NEXT_PUBLIC_API_URL in .env.local
-Ensure backend is running
-
-Issue: Images not uploading
-
-Check Cloudinary credentials in backend
-Verify file size < 5MB
-
-Issue: Authentication not persisting
-
-Check localStorage in browser
-Clear localStorage and re-login
-
-🔄 Development Workflow
-
-Create new branch for features
-Make changes
-Test locally
-Push to GitHub
-Vercel auto-deploys preview
-Merge to main for production
-
-📧 Contact
-Developer: Your Name
-Email: your.email@example.com
-GitHub: github.com/yourusername
-📄 License
-MIT License - created for Programming Hero Assignment
-
-Happy Coding! 🚀
+## 👨‍💻 Author
+**Your Name**
+- GitHub: [@yourusername](https://github.com/yourusername)
+- Email: your.email@example.com
+- Portfolio: https://yourportfolio.com
