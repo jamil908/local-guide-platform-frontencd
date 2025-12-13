@@ -13,12 +13,9 @@ import { FiEdit, FiMail, FiMapPin, FiStar, FiGlobe, FiDollarSign } from 'react-i
 // NOTE: Assuming original Button, Card, and Loading components are adaptable or replaced below.
 import Button from '@/components/ui/Button'; 
 import Card, { CardBody } from '@/components/ui/Card'; 
-import Loading from '@/components/shared/Loading';
+import Loading, { LoadingSpinner } from '@/components/shared/Loading';
 import toast from 'react-hot-toast';
 
-// --- CUSTOM COMPONENTS FOR DARK THEME (Used for consistency) ---
-
-// Custom Button for Amber Theme
 const AmberButton = ({ children, onClick, className, size, type, variant, ...props }: any) => {
     const baseStyle = "font-bold transition duration-200 ease-in-out rounded-full flex items-center justify-center";
     const sizeStyle = size === 'lg' ? 'px-8 py-3 text-lg' : size === 'sm' ? 'px-4 py-1.5 text-sm' : 'px-6 py-2 text-base';
@@ -55,9 +52,6 @@ const DarkCard = ({ children, className, hover, ...props }: any) => {
         </div>
     );
 }
-
-// -----------------------------------------------------------------------------
-
 export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
@@ -66,21 +60,20 @@ export default function ProfilePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Safely extract the ID from params, assuming it's a string or array of strings.
   const profileId = Array.isArray(params.id) ? params.id[0] : params.id;
   
   useEffect(() => {
     if (profileId) {
         fetchProfile();
     }
-  }, [profileId]); // Depend on the derived profileId
+  }, [profileId]);
 
   const fetchProfile = async () => {
     try {
       const response = await api.get(`/users/${profileId}`);
       setProfile(response.data.data);
 
-      // If guide, fetch their listings
+      
       if (response.data.data.role === 'GUIDE') {
         try {
           const listingsRes = await api.get(`/listings?guideId=${profileId}`);
@@ -99,7 +92,7 @@ export default function ProfilePage() {
 
   const isOwnProfile = currentUser?.id === profileId;
 
-  if (loading) return <Loading color="text-amber-500" className="bg-gray-900 min-h-screen" />;
+  if (loading) return <LoadingSpinner size="lg"></LoadingSpinner>;
   if (!profile) return <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">Profile not found</div>;
 
   return (
@@ -107,7 +100,7 @@ export default function ProfilePage() {
       <div className="container-custom">
         <div className="max-w-5xl mx-auto">
           
-          {/* Profile Header */}
+       
           <DarkCard className="mb-10">
             <CardBody className="p-8">
               <div className="flex flex-col md:flex-row gap-8">

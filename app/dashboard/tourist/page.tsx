@@ -7,7 +7,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-// Assuming imports for api, auth, types, utils, icons, and components are correct
 import api from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Booking } from "@/types";
@@ -16,7 +15,7 @@ import {
   FiCalendar,
   FiMapPin,
   FiUser,
-  FiDollarSign,
+  
   FiClock,
   FiStar,
   FiChevronRight,

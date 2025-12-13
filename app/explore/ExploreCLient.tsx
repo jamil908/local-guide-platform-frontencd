@@ -6,14 +6,11 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api'; 
 import { Listing } from '@/types';
-import { FiStar, FiClock, FiDollarSign, FiMapPin, FiFilter, FiX } from 'react-icons/fi';
-import { LoadingSpinner } from '@/components/shared/Loading'; 
+import { FiStar, FiClock,  FiMapPin, FiFilter, FiX } from 'react-icons/fi';
 import { formatCurrency } from '@/lib/utils'; 
-import Button from '@/components/ui/Button'; 
 import Input from '@/components/ui/Input';
+import { LoadingSpinner } from '@/components/shared/Loading';
 
-// --- UTILITY HOOK: Body Scroll Lock ---
-// This prevents the main page from scrolling when the mobile modal is open.
 const useBodyScrollLock = (locked: boolean) => {
   useEffect(() => {
     if (locked) {
@@ -26,10 +23,7 @@ const useBodyScrollLock = (locked: boolean) => {
     };
   }, [locked]);
 };
-// -------------------------------------
 
-
-// --- CUSTOM BUTTON COMPONENTS (Same as before) ---
 const AmberButton = ({ children, onClick, className, size, type, variant, ...props }: any) => {
   const baseStyle = "font-bold transition duration-200 ease-in-out rounded-full";
   const sizeStyle = size === 'lg' ? 'px-8 py-3 text-lg' : size === 'sm' ? 'px-4 py-1.5 text-sm' : 'px-6 py-2 text-base';
@@ -54,8 +48,6 @@ const AmberButton = ({ children, onClick, className, size, type, variant, ...pro
     </button>
   );
 };
-// --------------------------------------------------------------------------------------------------
-
 
 export default function ExploreClient() {
   const searchParams = useSearchParams();
@@ -63,7 +55,7 @@ export default function ExploreClient() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   
-  useBodyScrollLock(showFilters); // FIX: Lock body scroll when filters are shown
+  useBodyScrollLock(showFilters); 
 
   const [filters, setFilters] = useState({
     city: searchParams.get('city') || '',
@@ -107,7 +99,7 @@ export default function ExploreClient() {
 
   // Return null if loading, the parent Suspense component handles the spinner
   if (loading) {
-    return null; 
+    return <LoadingSpinner></LoadingSpinner>
   }
 
   return (

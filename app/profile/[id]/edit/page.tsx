@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
@@ -8,11 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '@/lib/utils';
 import { FiSave, FiX, FiPlus } from 'react-icons/fi';
-// NOTE: Assuming original SingleImageUpload is available and adaptable.
 import SingleImageUpload from '@/components/ui/SingleImageUpload';
-// NOTE: Custom components are defined below for dark theme consistency.
-
-// --- CUSTOM COMPONENTS FOR DARK THEME (Used for consistency) ---
 
 const DarkLoading = ({ color = 'text-amber-500', className = 'min-h-screen bg-gray-900', ...props }: any) => (
     <div className={`flex items-center justify-center ${className}`} {...props}>
@@ -110,9 +107,7 @@ export default function ProfileEditPage() {
   const [expertiseInput, setExpertiseInput] = useState('');
 
   const profileId = Array.isArray(params.id) ? params.id[0] : params.id;
-// ProfileEditPage.tsx (FIXED useEffect)
 useEffect(() => {
-    // Only proceed if profileId is defined (to handle initial render)
     if (!profileId) return; 
 
     if (currentUser?.id !== profileId) {
@@ -121,7 +116,7 @@ useEffect(() => {
       return;
     }
     fetchProfile();
-}, [profileId, currentUser?.id, router]); // <-- FIX: Use primitives and the router object
+}, [profileId, currentUser?.id, router]); 
   const fetchProfile = async () => {
     if (!profileId) return;
     try {
@@ -320,12 +315,12 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* Guide-Specific Fields */}
+        
               {currentUser?.role === 'GUIDE' && (
                 <div className='space-y-6'>
                   <h2 className="text-xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Guide Details 🌟</h2>
 
-                  {/* Expertise */}
+              
                   <div>
                     <h3 className="text-lg font-semibold mb-3 text-gray-300">Areas of Expertise</h3>
                     
@@ -370,7 +365,7 @@ useEffect(() => {
                     </div>
                   </div>
 
-                  {/* Daily Rate */}
+                
                   <DarkInput
                     label="Daily Rate ($ USD)"
                     name="dailyRate"
@@ -383,7 +378,7 @@ useEffect(() => {
                 </div>
               )}
 
-              {/* Tourist-Specific Fields */}
+              
               {currentUser?.role === 'TOURIST' && (
                 <div className='space-y-6'>
                   <h2 className="text-xl font-bold mb-4 text-white border-b border-gray-700 pb-2">Travel Preferences 🗺️</h2>
@@ -404,7 +399,7 @@ useEffect(() => {
                 </div>
               )}
 
-              {/* Actions */}
+             
               <div className="flex gap-4 pt-6 border-t border-gray-700">
                 <AmberButton
                   type="button"

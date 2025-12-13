@@ -4,21 +4,18 @@
 import { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-// Assuming these imports are correct:
 import Button from '@/components/ui/Button';
 import Card, { CardBody } from '@/components/ui/Card';
 import { FiCheckCircle } from 'react-icons/fi';
 import confetti from 'canvas-confetti';
 
 export default function PaymentSuccessClient() {
-  // 🚩 useSearchParams is safely called here, on the client
   const searchParams = useSearchParams();
   const router = useRouter(); 
   const bookingId = searchParams.get('bookingId');
   const transactionId = searchParams.get('transactionId');
 
   useEffect(() => {
-    // Celebrate with confetti!
     confetti({
       particleCount: 100,
       spread: 70,
@@ -27,23 +24,20 @@ export default function PaymentSuccessClient() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-gray-800 flex items-center justify-center py-12 px-4">
       <Card className="max-w-md w-full">
         <CardBody className="text-center py-12">
-          {/* Success Icon */}
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FiCheckCircle className="text-green-600" size={48} />
           </div>
 
-          {/* Success Message */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold text-amber-600 mb-4">
             Payment Successful!
           </h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-amber-800 mb-8">
             Your booking has been confirmed. We've sent a confirmation email with all the details.
           </p>
 
-          {/* Transaction Details */}
           <div className="bg-gray-50 rounded-lg p-4 mb-8 text-left">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -57,7 +51,6 @@ export default function PaymentSuccessClient() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="space-y-3">
             <Link href={`/dashboard/tourist`} className="block">
               <Button className="w-full">

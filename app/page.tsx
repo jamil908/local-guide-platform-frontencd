@@ -9,9 +9,6 @@ import { useRouter } from 'next/navigation';
 import { FiSearch, FiMap, FiUsers, FiStar, FiHeart, FiCamera, FiCoffee, FiShield, FiAward, FiGlobe } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 
-// NOTE: Since the original Button component used blue, we need a MonochromaticButton
-// or ensure the existing Button component accepts styling that fits this new theme.
-// For the purpose of this dark redesign, I will define styles for a new dark/amber button look.
 
 const AmberButton = ({ children, onClick, className, size, type, ...props }: any) => {
   const baseStyle = "font-bold transition duration-200 ease-in-out";
@@ -30,7 +27,6 @@ const AmberButton = ({ children, onClick, className, size, type, ...props }: any
   );
 };
 
-// Use this for secondary actions, like the outline button in the CTA
 const DarkOutlineButton = ({ children, onClick, className, size, type, ...props }: any) => {
   const baseStyle = "font-bold transition duration-200 ease-in-out border-2";
   const sizeStyle = size === 'lg' ? 'px-8 py-3 text-lg' : 'px-6 py-2 text-base';
@@ -63,13 +59,10 @@ export default function HomePage() {
   };
 
   return (
-    // Set a deep, dark gray background for the entire page
-    <div className="bg-gray-900 text-gray-100">
+     <div className="bg-gray-900 text-gray-100">
       
-      {/* SECTION 1: Hero with Search (Dark & Gold) */}
-      <section className="relative bg-black text-white py-32 px-4 overflow-hidden">
-        {/* Subtle background overlay/texture */}
-        <div className="absolute inset-0 bg-pattern opacity-5"></div>
+       <section className="relative bg-black text-white py-32 px-4 overflow-hidden">
+         <div className="absolute inset-0 bg-pattern opacity-5"></div>
         <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-6xl font-extrabold mb-6 text-amber-400">
@@ -79,8 +72,7 @@ export default function HomePage() {
               Connect with passionate local experts who bring destinations to life
             </p>
             
-            {/* Search Bar (Dark style) */}
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto shadow-amber-500/30 shadow-2xl">
+             <form onSubmit={handleSearch} className="max-w-2xl mx-auto shadow-amber-500/30 shadow-2xl">
               <div className="flex flex-col sm:flex-row bg-gray-800 rounded-xl overflow-hidden p-2">
                 <div className="flex-1 flex items-center px-6 py-3">
                   <FiSearch className="text-amber-500 mr-4" size={24} />
@@ -102,8 +94,7 @@ export default function HomePage() {
               </div>
             </form>
 
-            {/* Quick Stats (Amber text on dark background) */}
-            <div className="grid grid-cols-3 gap-8 mt-20 max-w-2xl mx-auto">
+             <div className="grid grid-cols-3 gap-8 mt-20 max-w-2xl mx-auto">
               <div className="text-center">
                 <div className="text-5xl font-extrabold text-amber-400">500+</div>
                 <div className="text-gray-400 mt-2">Local Guides</div>
@@ -121,8 +112,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 2: How It Works (Dark Cards) */}
-      <section className="py-20 px-4 bg-gray-950">
+       <section className="py-20 px-4 bg-gray-950">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-white">How It Works</h2>
@@ -177,8 +167,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 3: Popular Categories (Monochrome Icons) */}
-      <section className="py-20 px-4 bg-gray-900">
+       <section className="py-20 px-4 bg-gray-900">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-white">Explore by Category</h2>

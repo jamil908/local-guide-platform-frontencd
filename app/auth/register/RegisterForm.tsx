@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/auth/register/RegisterForm.tsx
 'use client'; 
-// NOTE: Everything below is the exact code you provided, just renamed and moved.
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,10 +13,8 @@ import Input from '@/components/ui/Input';
 import { getErrorMessage } from '@/lib/utils';
 import { FiUser, FiMail, FiLock, FiCheckCircle } from 'react-icons/fi';
 
-// The component that uses useSearchParams
 export default function RegisterForm() {
   const router = useRouter();
-  // VULNERABLE HOOK: useSearchParams
   const searchParams = useSearchParams(); 
   const { login } = useAuth();
   const roleParam = searchParams.get('role');
@@ -33,7 +30,6 @@ export default function RegisterForm() {
   const [errors, setErrors] = useState<any>({});
 
   const validate = () => {
-    // ... (Your validation logic)
     const newErrors: any = {};
     if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required'; 
@@ -76,19 +72,15 @@ export default function RegisterForm() {
     }
   };
   
-  // RENDER JSD goes here
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-gray-900">
         
-      {/* Background Image Layer */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-30" 
         style={{ backgroundImage: "url('/background-image.jpg')" }}
       />
-      {/* Dark Overlay to make form readable */}
       <div className="absolute inset-0 bg-black/70" />
 
-      {/* Content Container */}
       <div className="max-w-md w-full relative z-10">
         <div 
           className={
@@ -96,7 +88,6 @@ export default function RegisterForm() {
             "hover:shadow-amber-500/50 hover:shadow-2xl"
           }
         >
-          {/* Header */}
           <div className="text-center mb-8">
             <FiCheckCircle className="mx-auto h-12 w-12 text-amber-500 mb-3" />
             <h2 className="text-3xl font-extrabold text-gray-50">

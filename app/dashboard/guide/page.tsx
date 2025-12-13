@@ -5,22 +5,17 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-// Assuming '@/lib/api', '@/contexts/AuthContext', and '@/types' are correctly defined
 import api from '@/lib/api'; 
 import { useAuth } from '@/contexts/AuthContext';
 import { Booking, Listing } from '@/types';
-// Assuming '@/lib/utils' is correctly defined
 import { formatDate, formatCurrency } from '@/lib/utils';
-import { FiPlus, FiCalendar, FiDollarSign, FiUsers, FiStar, FiEdit, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
-// Assuming '@/components/ui/Button', '@/components/ui/Card', and '@/components/shared/Loading' are correctly defined
-import Button from '@/components/ui/Button';
-import Card, { CardBody } from '@/components/ui/Card'; 
+import { FiPlus, FiCalendar, FiUsers, FiStar, FiEdit, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+import  { CardBody } from '@/components/ui/Card'; 
 import Loading from '@/components/shared/Loading';
 import toast from 'react-hot-toast';
 
-// --- CUSTOM COMPONENTS FOR DARK THEME (Adopted from the previous response) ---
 
-// Custom Button for Amber Theme
+
 const AmberButton = ({ children, onClick, className, size, type, variant, ...props }: any) => {
     const baseStyle = "font-bold transition duration-200 ease-in-out rounded-full flex items-center justify-center";
     const sizeStyle = size === 'lg' ? 'px-8 py-3 text-lg' : size === 'sm' ? 'px-4 py-1.5 text-sm' : 'px-6 py-2 text-base';
@@ -48,7 +43,6 @@ const AmberButton = ({ children, onClick, className, size, type, variant, ...pro
     );
 };
 
-// Custom Card for Dark Theme (assuming Card component can take tailwind classes)
 const DarkCard = ({ children, className, hover, ...props }: any) => {
     const baseStyle = "bg-gray-800 rounded-xl shadow-lg border border-gray-700";
     const hoverStyle = hover ? "hover:shadow-amber-500/30 transition-all duration-300 hover:border-amber-500" : "";
@@ -60,7 +54,6 @@ const DarkCard = ({ children, className, hover, ...props }: any) => {
     );
 }
 
-// -----------------------------------------------------------------------------
 
 export default function GuideDashboard() {
   const { user, isAuthenticated } = useAuth();
@@ -71,24 +64,21 @@ export default function GuideDashboard() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'listings'>('bookings');
 
   useEffect(() => {
-  // Check authentication status
   if (!isAuthenticated) {
     router.push('/auth/login');
     return;
   }
 
-  // Check user role (using optional chaining for safety)
   if (user?.role && user.role !== 'GUIDE') {
     router.push('/');
     return;
   }
 
-  // Fetch data only if authenticated and the role is confirmed or null (waiting for confirmation)
   if (isAuthenticated && user?.role === 'GUIDE') {
     fetchData();
   }
   
-}, [isAuthenticated, user?.role, router]); // <- FIX: use primitive value (user?.role)
+}, [isAuthenticated, user?.role, router]);
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -131,7 +121,7 @@ export default function GuideDashboard() {
   const upcomingBookings = bookings.filter(
     (b) => b.status === 'CONFIRMED' && new Date(b.bookingDate) >= new Date()
   );
-  // Calculate total earnings from completed bookings
+
   const totalEarnings = bookings
     .filter((b) => b.status === 'COMPLETED')
     .reduce((sum, b) => sum + b.totalAmount, 0);

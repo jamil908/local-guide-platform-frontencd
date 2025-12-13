@@ -26,11 +26,11 @@ export default function RootLayout({
         <AuthProvider>
           <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="grow">{children}</main>
+            <main className="grow bg-gray-900 min-h-screen">{children}</main>
             <Footer />
           </div>
           <Toaster
-            position="top-right"
+            position="top-center"
             toastOptions={{
               duration: 3000,
               style: {

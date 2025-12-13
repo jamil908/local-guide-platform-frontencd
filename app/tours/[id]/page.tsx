@@ -19,13 +19,9 @@ import { FiStar, FiClock, FiMapPin, FiUsers, FiCalendar, FiDollarSign, FiShare2,
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import Loading from '@/components/shared/Loading';
 
-// --- CHANGE 1: Import DarkCard instead of the light Card ---
 import DarkCard, { DarkCardBody } from '@/components/ui/Card2';
-// Note: Assuming you only have DarkCard component, I'm renaming the local import to Card 
-// to minimize changes in the rest of the file.
 const Card = DarkCard;
 const CardBody = DarkCardBody;
-// -------------------------------------------------------------
 
 export default function TourDetailsPage() {
   const params = useParams();
@@ -191,17 +187,17 @@ export default function TourDetailsPage() {
                   </div>
                 </div>
 
-                {/* Share & Favorite */}
+                
                 <div className="flex gap-2">
                   <button
                     onClick={shareUrl}
-                    // --- CHANGE 4: Dark theme border/hover for buttons ---
+                  
                     className="p-3 border border-gray-700 rounded-lg hover:bg-gray-800 transition" 
                   >
                     <FiShare2 />
                   </button>
                   <button 
-                    // --- CHANGE 4: Dark theme border/hover for buttons ---
+                   
                     className="p-3 border border-gray-700 rounded-lg hover:bg-gray-800 transition"
                   >
                     <FiHeart />
@@ -209,8 +205,7 @@ export default function TourDetailsPage() {
                 </div>
               </div>
 
-              {/* Quick Info */}
-              {/* --- CHANGE 5: Use Amber/Black Quick Info style --- */}
+             
               <div className="grid grid-cols-3 gap-4 p-4 bg-gray-800 rounded-xl border border-amber-700"> 
                 <div className="text-center">
                   <FiClock className="mx-auto text-amber-500 mb-2" size={24} />
@@ -230,7 +225,7 @@ export default function TourDetailsPage() {
               </div>
             </div>
 
-            {/* About (Uses DarkCard) */}
+            
             <Card>
               <CardBody>
                 <h2 className="text-2xl font-bold mb-4">About this experience</h2>
@@ -240,7 +235,6 @@ export default function TourDetailsPage() {
               </CardBody>
             </Card>
 
-            {/* Itinerary (Uses DarkCard) */}
             {listing.itinerary && (
               <Card>
                 <CardBody>
@@ -261,7 +255,7 @@ export default function TourDetailsPage() {
               </Card>
             )}
 
-            {/* Meeting Point (Uses DarkCard) */}
+            
             <Card>
               <CardBody>
                 <h2 className="text-2xl font-bold mb-4">Where we'll meet</h2>
@@ -277,7 +271,7 @@ export default function TourDetailsPage() {
               </CardBody>
             </Card>
 
-            {/* Your Guide (Uses DarkCard) */}
+            
             <Card>
               <CardBody>
                 <h2 className="text-2xl font-bold mb-4">Meet your guide</h2>
@@ -309,7 +303,7 @@ export default function TourDetailsPage() {
                         {listing.guide.expertise.map((exp, idx) => (
                           <span
                             key={idx}
-                            // --- CHANGE 6: Amber Tag Style ---
+                           
                             className="px-3 py-1 bg-amber-900 text-amber-300 text-sm rounded-full"
                           >
                             {exp}
@@ -318,7 +312,7 @@ export default function TourDetailsPage() {
                       </div>
                     )}
                     <Link href={`/profile/${listing.guide.id}`} className="mt-4 inline-block">
-                      {/* Assuming Button component is styled appropriately for dark theme/amber, if not, adjust here */}
+                      
                       <Button variant="outline" size="sm" className="border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-gray-900">
                         View Profile
                       </Button>
@@ -328,7 +322,7 @@ export default function TourDetailsPage() {
               </CardBody>
             </Card>
 
-            {/* Reviews (Uses DarkCard) */}
+
             <Card>
               <CardBody>
                 <div className="flex items-center justify-between mb-6">
@@ -356,7 +350,7 @@ export default function TourDetailsPage() {
                               className="w-12 h-12 rounded-full"
                             />
                           ) : (
-                            // --- CHANGE 7: Dark theme initials background ---
+                         
                             <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-semibold"> 
                               {getInitials(review.tourist.name || 'User')}
                             </div>
@@ -424,7 +418,7 @@ export default function TourDetailsPage() {
                           <FiCalendar className="inline mr-2" />
                           Select Date
                         </label>
-                        {/* --- CHANGE 9: Dark theme input style and amber focus --- */}
+                        
                         <input
                           type="date"
                           value={bookingDate}
@@ -440,7 +434,7 @@ export default function TourDetailsPage() {
                           <FiUsers className="inline mr-2" />
                           Number of People
                         </label>
-                        {/* --- CHANGE 9: Dark theme input style and amber focus --- */}
+                       
                         <input
                           type="number"
                           value={numberOfPeople}
@@ -470,7 +464,6 @@ export default function TourDetailsPage() {
                         </div>
                       </div>
 
-                      {/* Book Button (Assuming your Button component supports theme adjustments) */}
                       <Button
                         onClick={handleBooking}
                         isLoading={booking}
@@ -488,7 +481,7 @@ export default function TourDetailsPage() {
                   ) : (
                     /* Payment Section */
                     <div className="space-y-4">
-                      {/* --- CHANGE 10: Dark theme success alert --- */}
+                    
                       <div className="bg-green-900/50 border border-green-700 rounded-lg p-4 mb-4">
                         <div className="flex items-start gap-3">
                           <FiAlertCircle className="text-green-400 mt-0.5" />
@@ -507,7 +500,7 @@ export default function TourDetailsPage() {
                           <span className="text-amber-500">{formatCurrency(calculateTotalPrice())}</span>
                         </div>
 
-                        {/* Payment Button (Needs separate theming if it's a separate component) */}
+                      
                         <PaymentButton
                           bookingId={createdBookingId!}
                           amount={calculateTotalPrice()}
@@ -526,7 +519,6 @@ export default function TourDetailsPage() {
               </Card>
 
               {/* Trust Badges */}
-              {/* --- CHANGE 11: Dark theme trust badges --- */}
               <div className="mt-6 p-4 bg-gray-800 rounded-lg border border-amber-800">
                 <h3 className="font-semibold mb-3 text-sm text-amber-500">Why book with us?</h3>
                 <ul className="space-y-2 text-sm text-gray-300">

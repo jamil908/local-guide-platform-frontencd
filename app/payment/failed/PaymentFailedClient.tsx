@@ -2,31 +2,25 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-// Assuming you have these components:
 import Button from '@/components/ui/Button';
 import Card, { CardBody } from '@/components/ui/Card';
 import { FiXCircle } from 'react-icons/fi';
 
 export default function PaymentFailedClient() {
-  // 🚩 This hook requires the component to be client-side and wrapped in Suspense
   const searchParams = useSearchParams();
   
-  // Safely get the parameter, handling null case
   const bookingId = searchParams.get('bookingId') || '';
 
-  // Determine the correct 'Try Again' link based on whether we have an ID
   const retryLink = bookingId ? `/tours/${bookingId}` : '/explore';
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <Card className="max-w-md w-full">
         <CardBody className="text-center py-12">
-          {/* Failed Icon */}
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FiXCircle className="text-red-600" size={48} />
           </div>
 
-          {/* Failed Message */}
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Payment Failed
           </h1>
@@ -34,7 +28,6 @@ export default function PaymentFailedClient() {
             Unfortunately, your payment could not be processed. Please try again or contact support if the problem persists.
           </p>
 
-          {/* Possible Reasons */}
           <div className="bg-gray-50 rounded-lg p-4 mb-8 text-left">
             <h3 className="font-semibold text-sm text-gray-900 mb-2">
               Common reasons:
@@ -47,7 +40,6 @@ export default function PaymentFailedClient() {
             </ul>
           </div>
 
-          {/* Action Buttons */}
           <div className="space-y-3">
             <Link href={retryLink} className="block">
               <Button className="w-full">
