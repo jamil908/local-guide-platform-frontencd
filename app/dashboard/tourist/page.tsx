@@ -2,6 +2,8 @@
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -25,9 +27,6 @@ import toast from "react-hot-toast";
 import ReviewModal from "@/components/ui/ReviewModal";
 
 
-// --- CUSTOM COMPONENTS OVERRIDES FOR AMBER/DARK THEME ---
-
-// 1. Amber Button Component (Replacement for standard Button)
 const AmberButton = ({ children, onClick, className, size, type, variant, ...props }: any) => {
   const baseStyle = "font-bold transition duration-200 ease-in-out rounded-lg";
   const sizeStyle = size === 'lg' ? 'px-8 py-3 text-lg' : size === 'sm' ? 'px-4 py-2 text-sm' : 'px-6 py-2.5 text-base';
@@ -82,8 +81,6 @@ const AmberLoading = () => (
     </div>
 )
 
-// ----------------------------------------------------------------------
-
 
 export default function TouristDashboard() {
   const { user, isAuthenticated } = useAuth();
@@ -93,7 +90,7 @@ export default function TouristDashboard() {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-
+  console.log(bookings)
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/auth/login");
@@ -164,7 +161,6 @@ const handleCancelBooking = async (bookingId: string) => {
       new Date(b.bookingDate) > currentDate && // Date is strictly in the future
       b.status !== "CANCELLED"
   );
-
   const pastBookings = bookings.filter(
     (b) =>
       new Date(b.bookingDate) <= currentDate || // Date is in the past or today
@@ -218,7 +214,7 @@ const handleCancelBooking = async (bookingId: string) => {
               <div className="text-3xl font-bold text-amber-400 mb-2">
                 {formatCurrency(
                   bookings
-                    .filter((b) => b.status === "COMPLETED")
+                    .filter((b) => b.status === "CONFIRMED")
                     .reduce((sum, b) => sum + b.totalAmount, 0)
                 )}
               </div>

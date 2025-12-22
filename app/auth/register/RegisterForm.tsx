@@ -48,7 +48,7 @@ export default function RegisterForm() {
 
     try {
       const { confirmPassword, ...registerData } = formData;
-      const response = await api.post('/auth/register', registerData);
+      const response = await api.post('/users/register', registerData);
       
       login(response.data.data.token);
       toast.success('Registration successful! Welcome!');

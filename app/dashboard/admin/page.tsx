@@ -137,7 +137,7 @@ export default function AdminDashboard() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const yearStart = new Date(now.getFullYear(), 0, 1);
 
-  const completedBookings = bookings.filter(b => b.status === 'COMPLETED');
+  const completedBookings = bookings.filter(b => b.status === 'CONFIRMED');
   const pendingBookings = bookings.filter(b => b.status === 'PENDING');
   const confirmedBookings = bookings.filter(b => b.status === 'CONFIRMED');
 
