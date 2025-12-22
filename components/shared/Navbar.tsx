@@ -4,7 +4,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { FiMenu, FiX, FiUser, FiLogOut, FiGlobe, FiBriefcase, FiAperture } from 'react-icons/fi';
+import { FiMenu, FiX, FiUser, FiLogOut, FiGlobe, FiBriefcase, FiAperture, FiSquare, FiHeadphones } from 'react-icons/fi';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -43,6 +43,9 @@ export default function Navbar() {
             <Link href="/explore" className={linkClasses}>
               Explore Tours
             </Link>
+            <Link href="/about" className={linkClasses}>About</Link>
+<Link href="/faq" className={linkClasses}>FAQ</Link>
+<Link href="/contact" className={linkClasses}>Contact</Link>
             
             {!user ? (
               <>
@@ -118,7 +121,22 @@ export default function Navbar() {
               >
                 <FiGlobe className="inline mr-2" /> Explore Tours
               </Link>
-              
+              <Link 
+              href="/faq"
+                className={mobileLinkClasses}
+                onClick={() => setIsOpen(false)}
+              >
+                <FiSquare className="inline mr-2" />Faq
+              </Link>
+              <Link 
+                href="/contact" 
+                className={mobileLinkClasses}
+                onClick={() => setIsOpen(false)}
+              >
+                <FiHeadphones className="inline mr-2" /> Contact
+              </Link>
+              <Link href="/about">About</Link>
+
               {!user ? (
                 <>
                   <Link 
