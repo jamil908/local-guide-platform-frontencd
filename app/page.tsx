@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiSearch, FiMap, FiUsers, FiStar, FiHeart, FiCamera, FiCoffee, FiShield, FiAward, FiGlobe } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
+import FeaturedToursSection from '@/components/shared/Featured';
 
 
 const AmberButton = ({ children, onClick, className, size, type, ...props }: any) => {
@@ -111,7 +112,17 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
+<section className="py-20 px-4 bg-gray-900">
+  <div className="container-custom">
+    <div className="text-center mb-16">
+      <h2 className="text-4xl font-bold mb-4 text-white">Featured Experiences</h2>
+      <p className="text-xl text-gray-400">
+        Handpicked tours from our best local guides
+      </p>
+    </div>
+    <FeaturedToursSection />
+  </div>
+</section>
        <section className="py-20 px-4 bg-gray-950">
         <div className="container-custom">
           <div className="text-center mb-16">
