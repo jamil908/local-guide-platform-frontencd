@@ -3,7 +3,7 @@
 Modern, responsive web application for connecting travelers with local tour guides.
 
 ## 🚀 Live Demo
-**Production:** https://your-app.onrender.com
+**Production:** https://local-guide-frontend-orcin.vercel.app/
 **Backend API:** https://your-backend.onrender.com
 
 ## 🎥 Video Demo
