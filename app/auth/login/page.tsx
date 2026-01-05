@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -16,17 +16,33 @@ import Input from '@/components/ui/Input';
 import { getErrorMessage } from '@/lib/utils';
 import { FiMail, FiLock, FiLogIn } from 'react-icons/fi'; // Icons for better design
 
+
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
-
+    const { login, isAuthenticated, user, isLoading } = useAuth();
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<any>({});
+ useEffect(() => {
+    if (!isLoading && isAuthenticated && user) {
+      if (user.role === 'ADMIN') {
+        router.replace('/dashboard/admin');
+      } else if (user.role === 'GUIDE') {
+        router.replace('/dashboard/guide');
+      } else {
+        router.replace('/explore');
+      }
+    }
+  }, [isAuthenticated, isLoading, user, router]);
 
+  // Prevent flicker while checking auth
+  if (isLoading || isAuthenticated) {
+    return null;
+  }
   // ... (Validation and Handlers remain the same) ...
   const validate = () => {
     const newErrors: any = {};

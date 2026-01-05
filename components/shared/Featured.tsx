@@ -4,7 +4,7 @@
 
 import Link from 'next/link';
 import { useGetListings } from '@/hooks/useGetListings';
-import { LoadingSpinner } from '@/components/shared/Loading';
+import SkeletonLoader from '@/components/shared/SkeletonLoader';
 import { FiStar, FiClock, FiMapPin } from 'react-icons/fi';
 import { formatCurrency } from '@/lib/utils';
 import { Listing } from '@/types';
@@ -13,11 +13,7 @@ export default function FeaturedToursSection() {
   const { data: allListings = [], isLoading, error } = useGetListings();
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <LoadingSpinner />
-      </div>
-    );
+    return <SkeletonLoader count={6} />;
   }
 
   if (error || allListings.length === 0) {

@@ -411,7 +411,7 @@ import { useSearchParams } from 'next/navigation';
 import { Listing } from '@/types';
 import { FiFilter, FiX } from 'react-icons/fi';
 import Input from '@/components/ui/Input';
-import { LoadingSpinner } from '@/components/shared/Loading';
+import SkeletonLoader from '@/components/shared/SkeletonLoader';
 import { useGetListings } from '@/hooks/useGetListings';
 import TourCard from '@/components/shared/Card';
 
@@ -469,7 +469,19 @@ export default function ExploreClient() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <div className="bg-black text-white py-12 border-b border-amber-500/50">
+          <div className="container-custom">
+            <h1 className="text-4xl font-extrabold mb-2 text-amber-400">Explore Tours</h1>
+            <p className="text-gray-400">Loading amazing experiences...</p>
+          </div>
+        </div>
+        <div className="container-custom py-12">
+          <SkeletonLoader count={6} />
+        </div>
+      </div>
+    );
   }
 
   if (error) {
