@@ -59,6 +59,8 @@ export default function SkeletonLoader({ count = 6, className }: SkeletonLoaderP
     </div>
   );
 }
+  
+
 
 // General Skeleton Component for flexibility
 export function Skeleton({ className }: { className?: string }) {
