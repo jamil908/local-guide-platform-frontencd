@@ -396,7 +396,7 @@ export default function HomePage() {
               Share your passion for your city, meet travelers from around the world, and earn money doing what you love
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register?role=guide">
+              <Link href="/auth/register?role=guide">
                 <AmberButton size="lg" className="w-full sm:w-auto">
                   Start Guiding Today
                 </AmberButton>

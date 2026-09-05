@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { 
   FiMapPin, 
   FiUsers, 
@@ -84,7 +85,7 @@ export default function AboutPage() {
             >
               <div className="bg-gray-900 border border-gray-800 p-2 rounded-2xl">
                 <div className="bg-amber-600 text-black px-8 py-4 rounded-xl font-black flex items-center gap-2 hover:bg-white transition-colors cursor-pointer">
-                  EXPLORE THE SYSTEM <FiArrowRight />
+                   <Link href="/"> EXPLORE THE SYSTEM</Link> <FiArrowRight />
                 </div>
               </div>
             </motion.div>
@@ -190,10 +191,11 @@ export default function AboutPage() {
           </h2>
           <div className="flex flex-wrap justify-center gap-6">
             <button className="bg-amber-600 text-black px-12 py-5 rounded-full font-black text-xl hover:shadow-[0_0_40px_rgba(217,119,6,0.4)] transition-all">
-              BOOK A TOUR
+                <Link href="/explore">BOOK A TOUR</Link>
             </button>
             <button className="border border-gray-800 text-white px-12 py-5 rounded-full font-black text-xl hover:bg-gray-900 transition-all">
-              BECOME A GUIDE
+               <Link href="/auth/register?role=guide"> BECOME A GUIDE</Link>
+             
             </button>
           </div>
         </motion.div>
